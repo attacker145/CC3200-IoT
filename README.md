@@ -1,2 +1,2 @@
 # CC3200-IoT
-The zip file has all the updated source code.
+The 3200ExositeDemo.zip file has all the updated source code.
