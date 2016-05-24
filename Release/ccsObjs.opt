@@ -1,0 +1,1 @@
+"./adc.obj" "./bma222drv.obj" "./device_status.obj" "./gpio_if.obj" "./i2c_if.obj" "./main.obj" "./pinmux.obj" "./smartconfig.obj" "./startup_ccs.obj" "./tmp006drv.obj" "./uart_if.obj" "./exosite/exosite.obj" "./exosite/exosite_pal.obj" "../cc3200v1p32.cmd" -l"libc.a" -ldriverlib.a -lsimplelink.a -lfree_rtos.a 
