@@ -45,6 +45,41 @@
 #include "device_status.h"
 
 
+// Driverlib includes
+#include "hw_ints.h"
+#include "hw_types.h"
+#include "hw_memmap.h"
+#include "hw_common_reg.h"
+#include "interrupt.h"
+#include "utils.h"
+#include "rom.h"
+#include "rom_map.h"
+#include "prcm.h"
+#include "pin.h"
+#include "uart.h"
+#include "adc.h"
+
+#include "rom_map.h"
+#include "gpio.h"
+
+// OS includes
+#include "osi.h"
+
+// Common interface includes
+#include "gpio_if.h"
+#include "uart_if.h"
+#include "i2c_if.h"
+#include "common.h"
+
+// App Includes
+#include "exosite.h"
+#include "device_status.h"
+#include "smartconfig.h"
+#include "tmp006drv.h"
+#include "bma222drv.h"
+#include "pinmux.h"
+
+
 //******************************************************************************
 //                            GLOBAL VARIABLES
 //******************************************************************************
@@ -99,11 +134,13 @@ int ConnectionTest()
     g_uiPingDone = 0;
     g_uiPingPacketsRecv = 0;
 
-
     /* Check for Internet connection */
     /* Querying for ti.com IP address */
     iStatus = sl_NetAppDnsGetHostByName((signed char *)"m2.exosite.com",
                                            10, &ulIpAddr, SL_AF_INET);
+
+    Report("\r\nConnectionTest: Check for Internet connection \r\n");
+
     if (iStatus < 0)
     {
         // LAN connection is successful
@@ -118,7 +155,7 @@ int ConnectionTest()
     // Try to ping
     sl_NetAppPingStart((SlPingStartCommand_t*)&PingParams, SL_AF_INET,
              (SlPingReport_t*)&PingReport, SimpleLinkPingReport);
-
+    Report("\r\nConnectionTest: Trying to ping \r\n");
     while (!g_uiPingDone)
     {
 
@@ -128,11 +165,13 @@ int ConnectionTest()
     {
         // LAN connection is successful
         // Internet connection is successful
+    	Report("\r\nConnectionTest: Internet connection is successful \r\n");
         g_uiPingPacketsRecv = 0;
         return 0;
     }
     else
     {
+    	Report("\r\nConnectionTest: Problem with Internet connection \r\n");
         // LAN connection is successful
         // Problem with Internet connection
         return -2;

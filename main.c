@@ -80,6 +80,9 @@
 // OS includes
 #include "osi.h"
 
+extern unsigned int GETChar(unsigned char *ucBuffer);
+extern void basic_Interpreter(void *pvParameters);
+
 // Common interface includes
 #include "gpio_if.h"
 #include "uart_if.h"
@@ -93,11 +96,14 @@
 #include "tmp006drv.h"
 #include "bma222drv.h"
 #include "pinmux.h"
+#include "serial_wifi.h"
 
 #define APPLICATION_VERSION              "0.1.0"
 #define APP_NAME                         "Exosite Cloud Demo"
-#define EXOSITE_TASK_PRIORITY            2
+//#define EXOSITE_TASK_PRIORITY            2
+#define EXOSITE_TASK_PRIORITY            3
 #define LOW_TASK_PRIORITY                1
+#define HIGH_TASK_PRIORITY               2
 #define SPAWN_TASK_PRIORITY              9
 #define OSI_STACK_SIZE                   2048
 #define SMALL_STACK_SIZE                 512
@@ -105,6 +111,8 @@
 #define SH_GPIO_3                       3       /* P58 - Device Mode */
 #define AUTO_CONNECTION_TIMEOUT_COUNT   50      /* 5 Sec */
 #define SL_STOP_TIMEOUT                 200
+
+unsigned char printflag = 0;
 
 typedef enum
 {
@@ -128,6 +136,8 @@ static unsigned char g_ucLEDStatus = LED_OFF;
 static unsigned long  g_ulStatus = 0;//SimpleLink Status
 static unsigned char  g_ucConnectionSSID[SSID_LEN_MAX+1]; //Connection SSID
 static unsigned char  g_ucConnectionBSSID[BSSID_LEN_MAX]; //Connection BSSID
+char acCmdStore[512];
+int iRetVal = FAILURE;
 
 unsigned long pulAdcSamples[4096];
 
@@ -1002,13 +1012,15 @@ long ConnectToNetwork()
     // staring simplelink
     lRetVal =  sl_Start(NULL,NULL,NULL);
     ASSERT_ON_ERROR( lRetVal);
+    //UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
 
     // Device is in AP Mode and Force AP Jumper is not Connected
     if(ROLE_STA != lRetVal && g_uiDeviceModeConfig == ROLE_STA )
     {
         if (ROLE_AP == lRetVal)
         {
-            // If the device is in AP mode, we need to wait for this event 
+        	UART_PRINT("\r\nConnectToNetwork: Current AP mode, the jumper is not connected\r\n");
+        	// If the device is in AP mode, we need to wait for this event
             // before doing anything 
             while(!IS_IP_ACQUIRED(g_ulStatus))
             {
@@ -1019,14 +1031,17 @@ long ConnectToNetwork()
         }
         //Switch to STA Mode
         lRetVal = ConfigureMode(ROLE_STA);
+        UART_PRINT("\r\nConnectToNetwork: Switch to STA mode\r\n");
         ASSERT_ON_ERROR( lRetVal);
     }
 
     //Device is in STA Mode and Force AP Jumper is Connected
     if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
     {
-         //Switch to AP Mode
+    	UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
+    	 //Switch to AP Mode
          lRetVal = ConfigureMode(ROLE_AP);
+         UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
          ASSERT_ON_ERROR( lRetVal);
 
     }
@@ -1034,7 +1049,8 @@ long ConnectToNetwork()
     //No Mode Change Required
     if(lRetVal == ROLE_AP)
     {
-        //waiting for the AP to acquire IP address from Internal DHCP Server
+    	UART_PRINT("\r\nConnectToNetwork: Current AP mode\r\n");
+    	//waiting for the AP to acquire IP address from Internal DHCP Server
         // If the device is in AP mode, we need to wait for this event 
         // before doing anything 
         while(!IS_IP_ACQUIRED(g_ulStatus))
@@ -1073,7 +1089,8 @@ long ConnectToNetwork()
     }
     else
     {
-        //Stop Internal HTTP Server
+    	UART_PRINT("\r\nConnectToNetwork: Current STA mode\r\n");
+    	//Stop Internal HTTP Server
         lRetVal = sl_NetAppStop(SL_NET_APP_HTTP_SERVER_ID);
         ASSERT_ON_ERROR( lRetVal);
 
@@ -1098,13 +1115,15 @@ long ConnectToNetwork()
         //Couldn't connect Using Auto Profile
         if(uiConnectTimeoutCnt == AUTO_CONNECTION_TIMEOUT_COUNT)
         {
-            //Blink Red LED to Indicate Connection Error
+        	UART_PRINT("\r\nConnectToNetwork: Couldn't connect Using Auto Profile\r\n");
+        	//Blink Red LED to Indicate Connection Error
             GPIO_IF_LedOn(MCU_RED_LED_GPIO);
             
             CLR_STATUS_BIT_ALL(g_ulStatus);
 
             //Connect Using Smart Config
             lRetVal = SmartConfigConnect();
+            UART_PRINT("\r\nConnectToNetwork: Connecting Using Smart Config\r\n");
             ASSERT_ON_ERROR(lRetVal);
 
             //Waiting for the device to Auto Connect
@@ -1373,7 +1392,8 @@ static void AccSampleTask( void *pvParameters )
 		//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
 		//GPIO_IF_LedOff(MCU_GREEN_LED_GPIO);
 		AccSample();
-		UART_PRINT("Just got a new accelerometer data sample \n\r\r");
+		//UART_PRINT("Just got a new accelerometer data sample \n\r\r");
+		//GPIO_IF_LedToggle(MCU_GREEN_LED_GPIO);
         osi_Sleep(100);
 	}
 }
@@ -1389,15 +1409,63 @@ static void AccSampleTask( void *pvParameters )
 //*****************************************************************************
 static void UptimeTask( void *pvParameters )
 {
+	char c = 0;
 	while(1)
 	{
 		//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
 		//GPIO_IF_LedOff(MCU_GREEN_LED_GPIO);
 		g_uptimeSec++;
-		UART_PRINT("Executing UptimeTask \n\r\r");
+		c = MAP_UARTCharGetNonBlocking(CONSOLE);        // Get a single character
+		if (c != 0){
+			UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+			g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]);
+		}
+		//GPIO_IF_LedToggle(MCU_ORANGE_LED_GPIO);
+		//basic_Interpreter();
+		//if(xSemaphoreTake(uart_lock, 1000)) {
+		      // Use Guarded Resource
+		//            Report("1");
+		//            // Give Semaphore back:
+		//            xSemaphoreGive(uart_lock);
+		//}
+
+		//if((g_UartCmdSent == 1) &&(g_UartHaveCmd ==0))
+		//        {
+		//            g_UartCmdSent = 0;
+		//            memset(g_ucUARTBuffer, 0, sizeof(g_ucUARTBuffer));
+		//        }
+		//        g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]);
+
+		//
+		// Get the user command line and load acCmdStore[512] buffer.
+		//
+		//iRetVal = GetCmd(acCmdStore, sizeof(acCmdStore));				// Fill acCmdStore[512] buffer. *************** Get COMMAND
+
+		//if(iRetVal < 0)
+		//{
+		//
+		// Error in parsing the command as length is exceeded.
+		//
+		//	Message("Command length exceeded 512 bytes \n\r");
+		//}
+		//else if(iRetVal == 0)
+		//{
+		//
+		// No input. Just an enter pressed probably. Display a prompt.
+		//
+		//}
+		//else
+		//{
+
+		//}
+
+
+
+
         osi_Sleep(1000);
 	}
 }
+
 
 //*****************************************************************************
 //
@@ -1460,6 +1528,7 @@ void main()
 {
     long   lRetVal = -1;
     unsigned int  uiChannel;
+
     //unsigned int  uiIndex=0;
 
     //
@@ -1493,7 +1562,7 @@ void main()
     GPIO_IF_LedOff(MCU_RED_LED_GPIO);
 
     //
-    // I2C Init
+    // I2C Init	I2C Init I2C Init I2C Init I2C Init I2C Init I2C Init
     //
     lRetVal = I2C_IF_Open(I2C_MASTER_MODE_FST);
     if(lRetVal < 0)
@@ -1502,7 +1571,7 @@ void main()
         LOOP_FOREVER();
     }
 
-    //Init Temprature Sensor
+    //Init Temprature Sensor Init Temprature Sensor Init Temprature Sensor
     lRetVal = TMP006DrvOpen();
     if(lRetVal < 0)
     {
@@ -1510,7 +1579,7 @@ void main()
         LOOP_FOREVER();
     }
 
-    //Init Accelerometer Sensor
+    //Init Accelerometer Sensor Init Accelerometer Sensor Init Accelerometer Sensor
     lRetVal = BMA222Open();
     if(lRetVal < 0)
     {
@@ -1518,6 +1587,12 @@ void main()
         LOOP_FOREVER();
     }
     
+    /*
+     * ****************************************************************************
+     * 				CONFIGURE ADC CHANNEL		CONFIGURE ADC CHANNEL
+     * ****************************************************************************
+     */
+
     //
     // Pinmux for the selected ADC input pin
     //
@@ -1556,7 +1631,11 @@ void main()
 
     // void adcPrint (void) function goes here
 
-
+    /*
+     * ************************************************************************
+     * 				START MAIN THREADS		START MAIN THREADS
+     * ************************************************************************
+     */
 
 
     //
@@ -1569,6 +1648,8 @@ void main()
         LOOP_FOREVER();
     }    
     
+    printflag = 0;
+
     //
     // Create Exosite Task
     //
@@ -1586,7 +1667,9 @@ void main()
     //
     lRetVal = osi_TaskCreate(UptimeTask, (signed char*)"UptimeTask", \
                                 SMALL_STACK_SIZE, NULL, \
-                                LOW_TASK_PRIORITY, NULL );
+								HIGH_TASK_PRIORITY, NULL );
+
+
     if(lRetVal < 0)
     {
         ERR_PRINT(lRetVal);
@@ -1604,6 +1687,17 @@ void main()
         ERR_PRINT(lRetVal);
         LOOP_FOREVER();
     }
+
+    // create a separate thread for reading UART
+    //lRetVal = osi_TaskCreate(basic_Interpreter,(signed char *)"uart", \
+    //                            OSI_STACK_SIZE, NULL,
+    //                            0, NULL);
+
+    //if(lRetVal < 0)
+    //{
+    //    ERR_PRINT(lRetVal);
+    //    LOOP_FOREVER();
+    //}
 
     //
     // Start OS Scheduler
