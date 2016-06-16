@@ -138,11 +138,11 @@ unsigned int GETChar(unsigned char *ucBuffer)
     //
     // Wait to receive a character over UART
     //
-    while(MAP_UARTCharsAvail(CONSOLE) == false)
+    while(MAP_UARTCharsAvail(CONSOLE) == false)  // Read UART0                              
     {
-    	osi_Sleep(1);
+        osi_Sleep(1);
     }
-    c = MAP_UARTCharGetNonBlocking(CONSOLE);		// Get a single character
+    c = MAP_UARTCharGetNonBlocking(CONSOLE);        // Get a single character
 
     MAP_UARTCharPut(CONSOLE, c);
     ilength=0;
@@ -171,7 +171,7 @@ unsigned int GETChar(unsigned char *ucBuffer)
         }
         while(MAP_UARTCharsAvail(CONSOLE) == false)
         {
-        	osi_Sleep(1);
+            osi_Sleep(1);
         }
         c = MAP_UARTCharGetNonBlocking(CONSOLE);
         MAP_UARTCharPut(CONSOLE, c);

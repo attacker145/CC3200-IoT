@@ -796,8 +796,8 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             {
 
             	UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
-            	g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
-
+            	//g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
+            	g_ucUARTRecvBuffer[0] = 'H';
             	ptraccX = g_ucUARTRecvBuffer;
             	pSlHttpServerResponse->ResponseData.token_value.data = ptraccX;	// Pointer to the entered string
             	short sLenAccX = itoa(g_accXIntervalSum,(char*)ptraccX);		//Get length of the sring stored in g_ucUARTRecvBuffer

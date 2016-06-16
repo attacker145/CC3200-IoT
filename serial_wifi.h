@@ -148,7 +148,7 @@ typedef enum
 #define UART_BAUD_RATE  				115200
 #define SYSCLK          				80000000
 #define CONSOLE        					UARTA0_BASE
-
+#define CONSOLE1        				UARTA1_BASE
 #define DATE                10    /* Current Date */
 #define MONTH               7     /* Month 1-12 */
 #define YEAR                2014  /* Current year */
