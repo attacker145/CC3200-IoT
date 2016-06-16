@@ -129,6 +129,7 @@ static unsigned char POST_token[] = "__SL_P_ULD";
 static unsigned char GET_token_TEMP[]  = "__SL_G_UTP";
 static unsigned char GET_token_ACC[]  = "__SL_G_UAC";
 static unsigned char GET_token_UIC[]  = "__SL_G_UIC";
+static unsigned char GET_token_URT[]  = "__SL_G_URT";
 static int g_iInternetAccess = -1;
 static unsigned char g_ucDryerRunning = 0;
 static unsigned int g_uiDeviceModeConfig = ROLE_STA; //default is STA mode
@@ -658,7 +659,7 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             //unsigned char *tokenName;
             ptr = pSlHttpServerResponse->ResponseData.token_value.data;		// initialize pointer to location data: _u8     *data;
             pSlHttpServerResponse->ResponseData.token_value.len = 0;		// initialize length to zero
-            UART_PRINT("\n\n\rHTTP_GET: %s",ptr);  // add this line only. Print string pointed by ptr. Basically .data will be printed
+            UART_PRINT("\n\n\rHTTP_GET Tocken:\t %s",ptr);  // add this line only. Print string pointed by ptr. Basically .data will be printed
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data, 
                     GET_token_TEMP, strlen((const char *)GET_token_TEMP)) == 0)	//__SL_G_UTP
             {
@@ -787,6 +788,24 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             }
 
 
+            /*
+             * New UART token *************************************************************************
+			*/
+            if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data,
+            		GET_token_URT, strlen((const char *)GET_token_URT)) == 0)
+            {
+
+            	UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+            	g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
+
+            	ptraccX = g_ucUARTRecvBuffer;
+            	pSlHttpServerResponse->ResponseData.token_value.data = ptraccX;	// Pointer to the entered string
+            	short sLenAccX = itoa(g_accXIntervalSum,(char*)ptraccX);		//Get length of the sring stored in g_ucUARTRecvBuffer
+            	pSlHttpServerResponse->ResponseData.token_value.len += sLenAccX;
+            }
+
+
+
 
         }
             break;
@@ -795,9 +814,10 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
         {
             unsigned char led, i;
             unsigned long delay = 1000000;
-            unsigned char *ptr = pSlHttpServerEvent->EventData.httpPostData.token_name.data;
-            UART_PRINT("\n\n\rHTTP_POST: %s",ptr);  // add this line only
+            unsigned char *ptr = pSlHttpServerEvent->EventData.httpPostData.token_name.data; // Get tocken name supplied by the SL_NETAPP_HTTPPOSTTOKENVALUE_EVENT
+            UART_PRINT("\n\n\rHTTP_POST Tocken:\t %s", ptr);  // Print UART the tocken name
             //g_ucLEDStatus = 0;
+            //memcmp ( buffer1, buffer2, sizeof(buffer1) );
             if(memcmp(ptr, POST_token, strlen((const char *)POST_token)) == 0) //"__SL_P_ULD"
             {
             	// static unsigned char POST_token[] = "__SL_P_ULD";

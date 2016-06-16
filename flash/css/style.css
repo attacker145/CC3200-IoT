@@ -242,6 +242,18 @@ h2 { padding-left: 10%; }
 	float:left;
 	font-size:small;
 }
+.uartText {
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    color: #000000;
+    left: 140px;
+    position: relative;
+    padding: 4px;
+    height: 50px;
+    width: 200px;
+	float:left;
+	font-size:small;
+}
 .switchControl {
     float: left;
     width: 100px;
