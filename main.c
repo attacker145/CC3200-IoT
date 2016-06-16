@@ -656,6 +656,7 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             unsigned char *ptraccX;
             unsigned char *ptraccY;
             unsigned char *ptraccZ;
+            unsigned char *uart;
             //unsigned char *tokenName;
             ptr = pSlHttpServerResponse->ResponseData.token_value.data;		// initialize pointer to location data: _u8     *data;
             pSlHttpServerResponse->ResponseData.token_value.len = 0;		// initialize length to zero
@@ -797,11 +798,14 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
 
             	UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
             	//g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
-            	g_ucUARTRecvBuffer[0] = 'H';
-            	ptraccX = g_ucUARTRecvBuffer;
-            	pSlHttpServerResponse->ResponseData.token_value.data = ptraccX;	// Pointer to the entered string
-            	short sLenAccX = itoa(g_accXIntervalSum,(char*)ptraccX);		//Get length of the sring stored in g_ucUARTRecvBuffer
-            	pSlHttpServerResponse->ResponseData.token_value.len += sLenAccX;
+            	//g_ucUARTRecvBuffer[0] = 'H';
+            	//uart = g_ucUARTRecvBuffer;
+            	//uart = "hello uart";
+            	//short sLenuart = itoa(g_accXIntervalSum,(char*)uart);		//Get length of the sring stored in g_ucUARTRecvBuffer
+            	strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");
+            	pSlHttpServerResponse->ResponseData.token_value.len += strlen("hello uart");
+            	//pSlHttpServerResponse->ResponseData.token_value.data = uart;	// Pointer to the entered string
+            	//pSlHttpServerResponse->ResponseData.token_value.len += sLenuart;
             }
 
 
