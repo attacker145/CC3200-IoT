@@ -11,6 +11,7 @@
 $(function() {
     var Device_Temperature = $('#Device_Temperature_out'),
         Device_Accelerometer = $('#Device_Accelerometer_out'),
+        Device_UART = $('#UART_PRINT'),
         demoPolling = new com.TI.tokenPoller({
             "paramPage": "param_demos.html", 
             "refreshRate": 200,
@@ -31,7 +32,19 @@ $(function() {
                 "outputDefault": function() {
                     Device_Accelerometer.html("<i>reloading</i>");
                 }
-            }]
+            },
+            {
+                "paramId": "UART",
+                    "outputSuccess": function(output) {
+                    	Device_UART.html(output); // Print accelerometer data. Device_Accelerometer is the token received
+                    },
+                    "outputDefault": function() {
+                    	Device_UART.html("<i>Reading UART data</i>");
+                    }
+                }
+            
+            
+            ]
         });
 });
 </script>
@@ -67,7 +80,7 @@ $(function() {
         <div class="washDryer">
             <div class="washerText">Ambient Temp:<br /><span id="Device_Temperature_out"><i>reloading</i></span> &deg;C</div>&nbsp;&nbsp;&nbsp;
             <div class="dryerText">ACCELEROMETER:<br /><span id="Device_Accelerometer_out"><i>reloading</i></span></div>
-            <div class="uartText">UART:<br /><span id="uartText"><i>reading</i></span></div>
+            <div class="uartText">UART:<br /><span id="UART_PRINT"><i>reading</i></span></div>
             <br style="clear:both;" /><br>
             <style>
 				.wdimage {
