@@ -187,6 +187,7 @@ uint8_t exoPal_tcpSocketOpen()
 
 
 
+#include "uart_if.h"
 /*!
  * \brief Sends data to the open tcp socket
  *
@@ -213,7 +214,9 @@ uint8_t exoPal_socketWrite( const char * buffer, uint16_t len)
         // error
         return 1;
     }
-
+    Report("\r\n");
+    Report(buffer);										// Report sent data Report sent data Report sent data
+    Report("\r\n");
     return 0;
 }
 
