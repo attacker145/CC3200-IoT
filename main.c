@@ -99,7 +99,7 @@ extern void basic_Interpreter(void *pvParameters);
 #include "serial_wifi.h"
 
 #define APPLICATION_VERSION              "0.1.0"
-#define APP_NAME                         "Exosite Cloud Demo"
+#define APP_NAME                         "Exosite Cloud Demo Rev01"
 //#define EXOSITE_TASK_PRIORITY            2
 #define EXOSITE_TASK_PRIORITY            3
 #define LOW_TASK_PRIORITY                1
@@ -216,7 +216,7 @@ vAssertCalled( const char *pcFile, unsigned long ulLine )
 void
 vApplicationIdleHook( void )
 {
-	//AccSample();
+    //AccSample();
 }
 
 //*****************************************************************************
@@ -321,7 +321,7 @@ void ReadAccSensor()
     int iRet = -1;
     int iCount = 0;
       
-    iRet = BMA222ReadNew(&cAccXT1, &cAccYT1, &cAccZT1);	//Get the raw accelerometer data register readings
+    iRet = BMA222ReadNew(&cAccXT1, &cAccYT1, &cAccZT1); //Get the raw accelerometer data register readings
     if(iRet)
     {
         //In case of error/ No New Data return
@@ -601,7 +601,7 @@ void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
             // pEventData = &pNetAppEvent->EventData.ipReleased;
             //
         }
-		break;
+        break;
 
         default:
         {
@@ -650,7 +650,7 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
 {
     switch (pSlHttpServerEvent->Event)
     {
-        case SL_NETAPP_HTTPGETTOKENVALUE_EVENT:		// Get data from the server
+        case SL_NETAPP_HTTPGETTOKENVALUE_EVENT:     // Get data from the server
         {
             unsigned char *ptr;
             unsigned char *ptraccX;
@@ -658,15 +658,15 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             unsigned char *ptraccZ;
             unsigned char *uart;
             //unsigned char *tokenName;
-            ptr = pSlHttpServerResponse->ResponseData.token_value.data;		// initialize pointer to location data: _u8     *data;
-            pSlHttpServerResponse->ResponseData.token_value.len = 0;		// initialize length to zero
+            ptr = pSlHttpServerResponse->ResponseData.token_value.data;     // initialize pointer to location data: _u8     *data;
+            pSlHttpServerResponse->ResponseData.token_value.len = 0;        // initialize length to zero
             UART_PRINT("\n\n\rHTTP_GET Tocken:\t %s",ptr);  // add this line only. Print string pointed by ptr. Basically .data will be printed
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data, 
-                    GET_token_TEMP, strlen((const char *)GET_token_TEMP)) == 0)	//__SL_G_UTP
+                    GET_token_TEMP, strlen((const char *)GET_token_TEMP)) == 0) //__SL_G_UTP
             {
                 float fCurrentTemp;
-                TMP006DrvGetTemp(&fCurrentTemp);		// Get the temperature value and write it to fCurrentTemp
-                char cTemp = (char)fCurrentTemp;		// 8 bit temperature value
+                TMP006DrvGetTemp(&fCurrentTemp);        // Get the temperature value and write it to fCurrentTemp
+                char cTemp = (char)fCurrentTemp;        // 8 bit temperature value
                 short sTempLen = itoa(cTemp,(char*)ptr);// Convert integer to ASCII in decimal base
                 ptr[sTempLen++] = ' ';
                 ptr[sTempLen] = 'F';
@@ -685,9 +685,9 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                       GET_token_UIC, strlen((const char *)GET_token_UIC)) == 0)
             {
                 if(g_iInternetAccess==0)
-                    strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"1");	// LED ON
+                    strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"1");    // LED ON
                 else
-                    strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"0");	// LED OFF
+                    strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"0");    // LED OFF
                 pSlHttpServerResponse->ResponseData.token_value.len =  1;
             }
 
@@ -695,32 +695,32 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                        GET_token_ACC, strlen((const char *)GET_token_ACC)) == 0)
             {
 
-            	//unsigned char *str3;
-            	//int i=0;
-            	ReadAccSensor(); //float *pfCurrTemp
-            	ptraccX = pSlHttpServerResponse->ResponseData.token_value.data;
-            	//ptraccY = pSlHttpServerResponse->ResponseData.token_value.data;
-            	//ptraccZ = pSlHttpServerResponse->ResponseData.token_value.data;
-            	signed char cAccXT1, cAccYT1, cAccZT1;
-            	//unsigned char cAccXTu, cAccYTu, cAccZTu;
-            	unsigned char cAccYTu, cAccZTu;
-            	//_u8     *cAccXT2;	//_u8     *data;
-            	_u8     *cAccYT2;
-            	_u8     *cAccZT2;	//_u8     *data;
+                //unsigned char *str3;
+                //int i=0;
+                ReadAccSensor(); //float *pfCurrTemp
+                ptraccX = pSlHttpServerResponse->ResponseData.token_value.data;
+                //ptraccY = pSlHttpServerResponse->ResponseData.token_value.data;
+                //ptraccZ = pSlHttpServerResponse->ResponseData.token_value.data;
+                signed char cAccXT1, cAccYT1, cAccZT1;
+                //unsigned char cAccXTu, cAccYTu, cAccZTu;
+                unsigned char cAccYTu, cAccZTu;
+                //_u8     *cAccXT2; //_u8     *data;
+                _u8     *cAccYT2;
+                _u8     *cAccZT2;   //_u8     *data;
 
-            	BMA222ReadNew(&cAccXT1, &cAccYT1, &cAccZT1);
+                BMA222ReadNew(&cAccXT1, &cAccYT1, &cAccZT1);
 
-            	//cAccXTu = (unsigned char) cAccXT1;
-            	cAccYTu = (unsigned char) cAccYT1;
-            	cAccZTu = (unsigned char) cAccZT1;
+                //cAccXTu = (unsigned char) cAccXT1;
+                cAccYTu = (unsigned char) cAccYT1;
+                cAccZTu = (unsigned char) cAccZT1;
 
-            	//cAccXT2 = &cAccXTu;
-            	cAccYT2 = &cAccYTu;
-            	cAccZT2 = &cAccZTu;
+                //cAccXT2 = &cAccXTu;
+                cAccYT2 = &cAccYTu;
+                cAccZT2 = &cAccZTu;
 
-            	//ptraccX = cAccXT2;
-            	ptraccY = cAccYT2;
-            	ptraccZ = cAccZT2;
+                //ptraccX = cAccXT2;
+                ptraccY = cAccYT2;
+                ptraccZ = cAccZT2;
 
                 short sLenAccX = itoa(g_accXIntervalSum,(char*)ptraccX);// Convert integer to ASCII in decimal base. Convert x-axis value to a decimal string.
                 short sLenAccY = itoa(g_accYIntervalSum,(char*)ptraccY);// String that contains Y-axis data
@@ -773,39 +773,41 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                 ptraccX[sLenAccX++] = ' ';
                 ptraccX[sLenAccX++] = ' ';
 
-                //if(g_ucDryerRunning)	// g_ucDryerRunning is set in void ReadAccSensor()
+                //if(g_ucDryerRunning)  // g_ucDryerRunning is set in void ReadAccSensor()
                 //{
                     //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"Running");
                     //pSlHttpServerResponse->ResponseData.token_value.len += strlen("Running");
-                	pSlHttpServerResponse->ResponseData.token_value.data = ptraccX;
-                	pSlHttpServerResponse->ResponseData.token_value.len += sLenAccX;
+                    pSlHttpServerResponse->ResponseData.token_value.data = ptraccX;
+                    pSlHttpServerResponse->ResponseData.token_value.len += sLenAccX;
                 //}
                 //else
                 //{
                     //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"Stopped");
                     //pSlHttpServerResponse->ResponseData.token_value.len += strlen("Stopped");
                 //}
-                	UART_PRINT("\t\t Accelerometer data is sent \n\r");
+                    UART_PRINT("\t\t Accelerometer data is sent \n\r");
             }
 
 
             /*
              * New UART token *************************************************************************
-			*/
+            */
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data,
-            		GET_token_URT, strlen((const char *)GET_token_URT)) == 0)
+                    GET_token_URT, strlen((const char *)GET_token_URT)) == 0)
             {
 
-            	UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
-            	//g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
-            	//g_ucUARTRecvBuffer[0] = 'H';
-            	//uart = g_ucUARTRecvBuffer;
-            	//uart = "hello uart";
-            	//short sLenuart = itoa(g_accXIntervalSum,(char*)uart);		//Get length of the sring stored in g_ucUARTRecvBuffer
-            	strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");
-            	pSlHttpServerResponse->ResponseData.token_value.len += strlen("hello uart");
-            	//pSlHttpServerResponse->ResponseData.token_value.data = uart;	// Pointer to the entered string
-            	//pSlHttpServerResponse->ResponseData.token_value.len += sLenuart;
+                UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+                //g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
+                //g_ucUARTRecvBuffer[0] = 'H';
+                uart = g_ucUARTRecvBuffer; //g_ucUARTRecvBuffer
+                //uart = "hello uart";
+                short sLenuart = itoa(g_accXIntervalSum,(char*)uart); //Get length of the sring stored in g_ucUARTRecvBuffer
+                //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");
+                //pSlHttpServerResponse->ResponseData.token_value.data = uart;
+                //pSlHttpServerResponse->ResponseData.token_value.len += strlen("hello uart");
+                strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data, (const char *) uart);
+                //pSlHttpServerResponse->ResponseData.token_value.data = uart;  // Pointer to the entered string
+                pSlHttpServerResponse->ResponseData.token_value.len += sLenuart;
             }
 
 
@@ -824,13 +826,13 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             //memcmp ( buffer1, buffer2, sizeof(buffer1) );
             if(memcmp(ptr, POST_token, strlen((const char *)POST_token)) == 0) //"__SL_P_ULD"
             {
-            	// static unsigned char POST_token[] = "__SL_P_ULD";
-            	ptr = pSlHttpServerEvent->EventData.httpPostData.token_value.data;
+                // static unsigned char POST_token[] = "__SL_P_ULD";
+                ptr = pSlHttpServerEvent->EventData.httpPostData.token_value.data;
                 if(memcmp(ptr, "LED", 3) != 0)
                     break;
-                ptr += 3;	// First 3 received characters are "LED"
-                led = *ptr;	// has character '1'
-                ptr += 2;	// Skips the _ character sent by the web page
+                ptr += 3;   // First 3 received characters are "LED"
+                led = *ptr; // has character '1'
+                ptr += 2;   // Skips the _ character sent by the web page
                 if(led == '1')
                 {
                     if(memcmp(ptr, "ON", 2) == 0)
@@ -842,21 +844,21 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                     else if(memcmp(ptr, "Blink", 5) == 0) // com.TI.toggleLED('_Blink');
                     {
                         for (i = 0; i < 50; i++){
-                        	GPIO_IF_LedOn(MCU_RED_LED_GPIO);		// Turn On LED
-                        	MAP_UtilsDelay(delay);
-                        	GPIO_IF_LedOff(MCU_RED_LED_GPIO);		// Turn Off LED
-                        	MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0x10);
-                        	MAP_UtilsDelay(delay);
-                        	MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0x40);
-                        	MAP_UtilsDelay(delay);
-                        	MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0);
-                        	MAP_UtilsDelay(delay);
-                        	MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0);
-                        	MAP_UtilsDelay(delay);
+                            GPIO_IF_LedOn(MCU_RED_LED_GPIO);        // Turn On LED
+                            MAP_UtilsDelay(delay);
+                            GPIO_IF_LedOff(MCU_RED_LED_GPIO);       // Turn Off LED
+                            MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0x10);
+                            MAP_UtilsDelay(delay);
+                            MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0x40);
+                            MAP_UtilsDelay(delay);
+                            MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0);
+                            MAP_UtilsDelay(delay);
+                            MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0);
+                            MAP_UtilsDelay(delay);
                         }
-                        GPIO_IF_LedOn(MCU_RED_LED_GPIO);			// Turn On LED
-                        MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0x40);	// LED ON
-                        MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0);		// LED OFF
+                        GPIO_IF_LedOn(MCU_RED_LED_GPIO);            // Turn On LED
+                        MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0x40);    // LED ON
+                        MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0);       // LED OFF
                         g_ucLEDStatus = LED_BLINK;
 
                     }
@@ -871,7 +873,7 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                 else if(led == '2')
                 {
 
-                	if(memcmp(ptr, "ON", 2) == 0)
+                    if(memcmp(ptr, "ON", 2) == 0)
                     {
                         GPIO_IF_LedOn(MCU_ORANGE_LED_GPIO);
                         g_ucLEDStatus = LED_ON;
@@ -1030,12 +1032,13 @@ static int ConfigureMode(int iMode)
 //****************************************************************************
 long ConnectToNetwork()
 {
-    long lRetVal = -1;
+    long lRetVal = -1;                  // Link return value
     unsigned int uiConnectTimeoutCnt =0;
 
     // staring simplelink
     lRetVal =  sl_Start(NULL,NULL,NULL);
     ASSERT_ON_ERROR( lRetVal);
+
     //UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
 
     // Device is in AP Mode and Force AP Jumper is not Connected
@@ -1043,8 +1046,8 @@ long ConnectToNetwork()
     {
         if (ROLE_AP == lRetVal)
         {
-        	UART_PRINT("\r\nConnectToNetwork: Current AP mode, the jumper is not connected\r\n");
-        	// If the device is in AP mode, we need to wait for this event
+            UART_PRINT("\r\nConnectToNetwork: Current AP mode, the jumper is not connected\r\n");
+            // If the device is in AP mode, we need to wait for this event
             // before doing anything 
             while(!IS_IP_ACQUIRED(g_ulStatus))
             {
@@ -1062,10 +1065,10 @@ long ConnectToNetwork()
     //Device is in STA Mode and Force AP Jumper is Connected
     if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
     {
-    	UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
-    	 //Switch to AP Mode
+         UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
+         //Switch to AP Mode
          lRetVal = ConfigureMode(ROLE_AP);
-         UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
+         //UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
          ASSERT_ON_ERROR( lRetVal);
 
     }
@@ -1073,8 +1076,8 @@ long ConnectToNetwork()
     //No Mode Change Required
     if(lRetVal == ROLE_AP)
     {
-    	UART_PRINT("\r\nConnectToNetwork: Current AP mode\r\n");
-    	//waiting for the AP to acquire IP address from Internal DHCP Server
+         UART_PRINT("\r\nConnectToNetwork: Current AP mode\r\n");
+        //waiting for the AP to acquire IP address from Internal DHCP Server
         // If the device is in AP mode, we need to wait for this event 
         // before doing anything 
         while(!IS_IP_ACQUIRED(g_ulStatus))
@@ -1106,15 +1109,15 @@ long ConnectToNetwork()
        }
 
        char ssid[32];
-	   unsigned short len = 32;
-	   unsigned short config_opt = WLAN_AP_OPT_SSID;
-	   sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
-	   UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);
+       unsigned short len = 32;
+       unsigned short config_opt = WLAN_AP_OPT_SSID; //AP Mode
+       sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
+       UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);
     }
     else
     {
-    	UART_PRINT("\r\nConnectToNetwork: Current STA mode\r\n");
-    	//Stop Internal HTTP Server
+        UART_PRINT("\r\nConnectToNetwork: Current STA mode\r\n");
+        //Stop Internal HTTP Server
         lRetVal = sl_NetAppStop(SL_NET_APP_HTTP_SERVER_ID);
         ASSERT_ON_ERROR( lRetVal);
 
@@ -1122,7 +1125,7 @@ long ConnectToNetwork()
         lRetVal = sl_NetAppStart(SL_NET_APP_HTTP_SERVER_ID);
         ASSERT_ON_ERROR( lRetVal);
 
-    	//waiting for the device to Auto Connect
+        //waiting for the device to Auto Connect
         while(uiConnectTimeoutCnt<AUTO_CONNECTION_TIMEOUT_COUNT &&
             ((!IS_CONNECTED(g_ulStatus)) || (!IS_IP_ACQUIRED(g_ulStatus)))) 
         {
@@ -1139,15 +1142,15 @@ long ConnectToNetwork()
         //Couldn't connect Using Auto Profile
         if(uiConnectTimeoutCnt == AUTO_CONNECTION_TIMEOUT_COUNT)
         {
-        	UART_PRINT("\r\nConnectToNetwork: Couldn't connect Using Auto Profile\r\n");
-        	//Blink Red LED to Indicate Connection Error
-            GPIO_IF_LedOn(MCU_RED_LED_GPIO);
+            UART_PRINT("\r\nConnectToNetwork: Couldn't connect Using Auto Profile\r\n");
+            //Blink Red LED to Indicate Connection Error
+            GPIO_IF_LedOn(MCU_RED_LED_GPIO);    //Turn On red LED
             
             CLR_STATUS_BIT_ALL(g_ulStatus);
 
             //Connect Using Smart Config
-            lRetVal = SmartConfigConnect();
             UART_PRINT("\r\nConnectToNetwork: Connecting Using Smart Config\r\n");
+            lRetVal = SmartConfigConnect();
             ASSERT_ON_ERROR(lRetVal);
 
             //Waiting for the device to Auto Connect
@@ -1250,14 +1253,14 @@ void AccSample()
 //*****************************************************************************
 void SetAccAvg()
 {
-	unsigned long critKey;
+    unsigned long critKey;
 
     critKey = osi_EnterCritical();
     g_accXAvg = g_accXIntervalSum / g_accSampleCount;
     g_accYAvg = g_accYIntervalSum / g_accSampleCount;
     g_accZAvg = g_accZIntervalSum / g_accSampleCount;
     g_accTotalAvg = (g_accZIntervalSum + g_accYIntervalSum + g_accXIntervalSum ) /
-		(g_accSampleCount * 3);
+        (g_accSampleCount * 3);
 
     g_accXIntervalSum = 0;
     g_accYIntervalSum = 0;
@@ -1303,42 +1306,42 @@ static void ExositeTask(void *pvParameters)
     //Handle Async Events
     while(1)
     {
-    	//TODO: Wrap all Exosite calls in a check to see if we're connected.
+        //TODO: Wrap all Exosite calls in a check to see if we're connected.
         while(state != EXO_STATE_INIT_COMPLETE){
-    		UART_PRINT("[EXO] Exosite Init\r\n");
-    		state = exosite_init("texasinstruments","cc3200lp_v1");
-    		if(state == EXO_STATE_INIT_COMPLETE){
-    			UART_PRINT("[EXO] Activated, Ready to Go\r\n");
-    		}else if(state == EXO_STATE_INIT_ERROR){
-    			UART_PRINT("[EXO] Error Activating on Exosite (Add to Account or Re-enable for Activation)\r\n");
-    			retry_delay *= 2;
-    	        osi_Sleep(retry_delay);
-    		}else if(state == EXO_STATE_CONNECTION_ERROR){
-    			UART_PRINT("[EXO] Error Connecting to Exosite, Check Your Connection\r\n");
-    			//retry_delay *= 2;
-    	        osi_Sleep(retry_delay);
-    		}else if(state == EXO_STATE_NO_RESPONSE){
-    			UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
-    			retry_delay *= 2;
-    	        osi_Sleep(retry_delay);
-    		}else if(state == EXO_STATE_DEVICE_NOT_ENABLED){
-    			UART_PRINT("[EXO] Couldn't Activate on Exosite (Add to Account or Re-enable for Activation)\r\n");
-    			retry_delay *= 2;
-    	        osi_Sleep(retry_delay);
-    		}else if(state == EXO_STATE_R_W_ERROR){
-    			UART_PRINT("[EXO] Read/Write Error\r\n");
-    			retry_delay *= 2;
-    	        osi_Sleep(retry_delay);
-    		}else{
-    			UART_PRINT("[EXO] Unknown State in Init");
-    			return;
-    		}
+            UART_PRINT("[EXO] Exosite Init\r\n");
+            state = exosite_init("texasinstruments","cc3200lp_v1");
+            if(state == EXO_STATE_INIT_COMPLETE){
+                UART_PRINT("[EXO] Activated, Ready to Go\r\n");
+            }else if(state == EXO_STATE_INIT_ERROR){
+                UART_PRINT("[EXO] Error Activating on Exosite (Add to Account or Re-enable for Activation)\r\n");
+                retry_delay *= 2;
+                osi_Sleep(retry_delay);
+            }else if(state == EXO_STATE_CONNECTION_ERROR){
+                UART_PRINT("[EXO] Error Connecting to Exosite, Check Your Connection\r\n");
+                //retry_delay *= 2;
+                osi_Sleep(retry_delay);
+            }else if(state == EXO_STATE_NO_RESPONSE){
+                UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
+                retry_delay *= 2;
+                osi_Sleep(retry_delay);
+            }else if(state == EXO_STATE_DEVICE_NOT_ENABLED){
+                UART_PRINT("[EXO] Couldn't Activate on Exosite (Add to Account or Re-enable for Activation)\r\n");
+                retry_delay *= 2;
+                osi_Sleep(retry_delay);
+            }else if(state == EXO_STATE_R_W_ERROR){
+                UART_PRINT("[EXO] Read/Write Error\r\n");
+                retry_delay *= 2;
+                osi_Sleep(retry_delay);
+            }else{
+                UART_PRINT("[EXO] Unknown State in Init");
+                return;
+            }
         }
 
 
         UART_PRINT("[EXO] Writing Values...");
 
-    	AccSample(); // Just do a single reading for now. TODO: Make Async.
+        AccSample(); // Just do a single reading for now. TODO: Make Async.
         SetAccAvg();
 
         float sensorTemp;
@@ -1361,38 +1364,38 @@ static void ExositeTask(void *pvParameters)
                 g_accYAvg,
                 g_accZAvg,
                 sensorTemp,
-                g_SW2Counter);					// writes buf
+                g_SW2Counter);                  // writes buf
         // %llu - unsigned long long
-        ret = exosite_write(buf,strlen(buf));	// Writes the data buf[] in writeData to Exosite. !!!!!!!!!!!!!!!
+        ret = exosite_write(buf,strlen(buf));   // Writes the data buf[] in writeData to Exosite. !!!!!!!!!!!!!!!
         if(ret == 0){
-        	UART_PRINT("OK\r\n");
-        	retry_delay = 1000;
+            UART_PRINT("OK\r\n");
+            retry_delay = 1000;
         }else{
-        	UART_PRINT("ERROR\r\n");
-        	retry_delay *= 2;
-        	state = EXO_STATE_NOT_COMPLETE;
-        	ERR_PRINT(ret);
+            UART_PRINT("ERROR\r\n");
+            retry_delay *= 2;
+            state = EXO_STATE_NOT_COMPLETE;
+            ERR_PRINT(ret);
         }
 
         //LED Actions for OOB Code
         if(g_ucLEDStatus == LED_ON)
         {
-            GPIO_IF_LedOn(MCU_RED_LED_GPIO);		//Turn LED On
+            GPIO_IF_LedOn(MCU_RED_LED_GPIO);        //Turn LED On
         }
         if(g_ucLEDStatus == LED_OFF)
         {
-            GPIO_IF_LedOff(MCU_RED_LED_GPIO);		//Turn LED Off
+            GPIO_IF_LedOff(MCU_RED_LED_GPIO);       //Turn LED Off
         }
         if(g_ucLEDStatus==LED_BLINK)
         {
-        	GPIO_IF_LedToggle(MCU_RED_LED_GPIO);	//Toggle the Led state
+            GPIO_IF_LedToggle(MCU_RED_LED_GPIO);    //Toggle the Led state
         }
 
 
 
         // Limit Retry Delay to 10 Seconds During Development
         if(retry_delay > 10000)
-        	retry_delay = 10000;
+            retry_delay = 10000;
 
         osi_Sleep(retry_delay);
 
@@ -1411,15 +1414,15 @@ static void ExositeTask(void *pvParameters)
 //*****************************************************************************
 static void AccSampleTask( void *pvParameters )
 {
-	while(1)
-	{
-		//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
-		//GPIO_IF_LedOff(MCU_GREEN_LED_GPIO);
-		AccSample();
-		//UART_PRINT("Just got a new accelerometer data sample \n\r\r");
-		//GPIO_IF_LedToggle(MCU_GREEN_LED_GPIO);
+    while(1)
+    {
+        //GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
+        //GPIO_IF_LedOff(MCU_GREEN_LED_GPIO);
+        AccSample();
+        //UART_PRINT("Just got a new accelerometer data sample \n\r\r");
+        //GPIO_IF_LedToggle(MCU_GREEN_LED_GPIO);
         osi_Sleep(100);
-	}
+    }
 }
 
 //*****************************************************************************
@@ -1433,61 +1436,34 @@ static void AccSampleTask( void *pvParameters )
 //*****************************************************************************
 static void UptimeTask( void *pvParameters )
 {
-	char c = 0;
-	while(1)
-	{
-		//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
-		//GPIO_IF_LedOff(MCU_GREEN_LED_GPIO);
-		g_uptimeSec++;
-		c = MAP_UARTCharGetNonBlocking(CONSOLE);        // Get a single character
-		if (c != 0){
-			UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
-			g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]);
-		}
-		//GPIO_IF_LedToggle(MCU_ORANGE_LED_GPIO);
-		//basic_Interpreter();
-		//if(xSemaphoreTake(uart_lock, 1000)) {
-		      // Use Guarded Resource
-		//            Report("1");
-		//            // Give Semaphore back:
-		//            xSemaphoreGive(uart_lock);
-		//}
+    while(1)
+    {
+        //GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
+        g_uptimeSec++;
+        UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+        // Returns UART line read from the console. Parameter is unsigned char array
+        g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer[0]);
+        UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
 
-		//if((g_UartCmdSent == 1) &&(g_UartHaveCmd ==0))
-		//        {
-		//            g_UartCmdSent = 0;
-		//            memset(g_ucUARTBuffer, 0, sizeof(g_ucUARTBuffer));
-		//        }
-		//        g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]);
+        //if(iRetVal < 0)
+        //{
+        //
+        // Error in parsing the command as length is exceeded.
+        //
+        //  Message("Command length exceeded 512 bytes \n\r");
+        //}
+        //else if(iRetVal == 0)
+        //{
+        //
+        // No input. Just an enter pressed probably. Display a prompt.
+        //
+        //}
+        //else
+        //{
 
-		//
-		// Get the user command line and load acCmdStore[512] buffer.
-		//
-		//iRetVal = GetCmd(acCmdStore, sizeof(acCmdStore));				// Fill acCmdStore[512] buffer. *************** Get COMMAND
-
-		//if(iRetVal < 0)
-		//{
-		//
-		// Error in parsing the command as length is exceeded.
-		//
-		//	Message("Command length exceeded 512 bytes \n\r");
-		//}
-		//else if(iRetVal == 0)
-		//{
-		//
-		// No input. Just an enter pressed probably. Display a prompt.
-		//
-		//}
-		//else
-		//{
-
-		//}
-
-
-
-
+        //}
         osi_Sleep(1000);
-	}
+    }
 }
 
 
@@ -1546,7 +1522,7 @@ BoardInit(void)
 }
 
 //*****************************************************************************************************
-//                            MAIN FUNCTION										MAIN FUNCTION
+//                            MAIN FUNCTION                                     MAIN FUNCTION
 //*****************************************************************************************************
 void main()
 {
@@ -1586,7 +1562,7 @@ void main()
     GPIO_IF_LedOff(MCU_RED_LED_GPIO);
 
     //
-    // I2C Init	I2C Init I2C Init I2C Init I2C Init I2C Init I2C Init
+    // I2C Init I2C Init I2C Init I2C Init I2C Init I2C Init I2C Init
     //
     lRetVal = I2C_IF_Open(I2C_MASTER_MODE_FST);
     if(lRetVal < 0)
@@ -1613,7 +1589,7 @@ void main()
     
     /*
      * ****************************************************************************
-     * 				CONFIGURE ADC CHANNEL		CONFIGURE ADC CHANNEL
+     *              CONFIGURE ADC CHANNEL       CONFIGURE ADC CHANNEL
      * ****************************************************************************
      */
 
@@ -1657,7 +1633,7 @@ void main()
 
     /*
      * ************************************************************************
-     * 				START MAIN THREADS		START MAIN THREADS
+     *              START MAIN THREADS      START MAIN THREADS
      * ************************************************************************
      */
 
@@ -1691,7 +1667,7 @@ void main()
     //
     lRetVal = osi_TaskCreate(UptimeTask, (signed char*)"UptimeTask", \
                                 SMALL_STACK_SIZE, NULL, \
-								HIGH_TASK_PRIORITY, NULL );
+                                HIGH_TASK_PRIORITY, NULL );
 
 
     if(lRetVal < 0)
