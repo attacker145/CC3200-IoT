@@ -9,6 +9,6 @@
 	<linkerCommandFile value="oob.cmd"/>
 	<rts value="libc.a"/>
 	<templateProperties value="id=com.ti.common.project.core.emptyProjectTemplate,"/>
-	<isTargetManual value="false"/>
-	<origin value="C:/Users/rchak/Documents/Projects/WiFi Tag/CCSworkspace_new/CC3200CloudDemo-2/CC3200CloudDemo-2"/>
+	<isTargetManual value="true"/>
+	<origin value="E:/Projects/CC3200 Development/CCSworkspace_new/3200ExositeDemo"/>
 </projectOptions>

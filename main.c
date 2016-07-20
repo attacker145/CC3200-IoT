@@ -790,24 +790,31 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
 
 
             /*
-             * New UART token *************************************************************************
+             * New UART token ****************************New UART token*********************************** New UART token
             */
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data,
                     GET_token_URT, strlen((const char *)GET_token_URT)) == 0)
             {
 
-                UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+                //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
                 //g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
-                //g_ucUARTRecvBuffer[0] = 'H';
-                uart = g_ucUARTRecvBuffer; //g_ucUARTRecvBuffer
-                //uart = "hello uart";
-                short sLenuart = itoa(g_accXIntervalSum,(char*)uart); //Get length of the sring stored in g_ucUARTRecvBuffer
+                //g_ucUARTRecvBuffer[] = "hello uart"; //Nop
+                //uart = g_ucUARTRecvBuffer; //g_ucUARTRecvBuffer
+                uart = "Sending srings of data";
+                //short sLenuart = itoa(g_accXIntervalSum,(char*)uart); //Get length of the sring stored in g_ucUARTRecvBuffer
+
+                //short sLenuart = itoa(g_accXIntervalSum,"hello uart");
                 //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");
-                //pSlHttpServerResponse->ResponseData.token_value.data = uart;
                 //pSlHttpServerResponse->ResponseData.token_value.len += strlen("hello uart");
-                strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data, (const char *) uart);
-                //pSlHttpServerResponse->ResponseData.token_value.data = uart;  // Pointer to the entered string
-                pSlHttpServerResponse->ResponseData.token_value.len += sLenuart;
+
+                //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data, (const char *) uart);
+                //pSlHttpServerResponse->ResponseData.token_value.len += sLenuart;
+
+                //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");	//Works
+                //pSlHttpServerResponse->ResponseData.token_value.len += strlen("hello uart");		//Works
+
+                strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data, (const char *) uart);	//Works
+                pSlHttpServerResponse->ResponseData.token_value.len += strlen((const char *) uart);				//Works
             }
 
 
@@ -1443,7 +1450,7 @@ static void UptimeTask( void *pvParameters )
         UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
         // Returns UART line read from the console. Parameter is unsigned char array
         g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer[0]);
-        UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+        //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
 
         //if(iRetVal < 0)
         //{
