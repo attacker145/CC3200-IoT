@@ -113,7 +113,7 @@ extern void basic_Interpreter(void *pvParameters);
 #define SL_STOP_TIMEOUT                 200
 
 unsigned char printflag = 0;
-
+unsigned char g_ucUARTRecvBuffer1[80];
 typedef enum
 {
   LED_OFF = 0,
@@ -797,11 +797,8 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             {
 
                 //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
-                //g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer[0]); // Returns UART line read from the console
-                //g_ucUARTRecvBuffer[] = "hello uart"; //Nop
-                //uart = g_ucUARTRecvBuffer; //g_ucUARTRecvBuffer
-                uart = "Sending srings of data";
-                //short sLenuart = itoa(g_accXIntervalSum,(char*)uart); //Get length of the sring stored in g_ucUARTRecvBuffer
+                uart = g_ucUARTRecvBuffer1; //g_ucUARTRecvBuffer
+                //uart = "Sending srings of data"; // works
 
                 //short sLenuart = itoa(g_accXIntervalSum,"hello uart");
                 //strcpy((char*)pSlHttpServerResponse->ResponseData.token_value.data,"hello uart");
@@ -1449,7 +1446,7 @@ static void UptimeTask( void *pvParameters )
         g_uptimeSec++;
         UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
         // Returns UART line read from the console. Parameter is unsigned char array
-        g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer[0]);
+        g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
         //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
 
         //if(iRetVal < 0)
