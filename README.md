@@ -1,5 +1,8 @@
 # CC3200 Cloud Demo
 
+Project design files, explanations, and other important information at: http://www.cnktechlabs.com/CC3200.html 
+
+
 This repository contains code that demonstrates using the Exosite cloud platform
 with TI's CC3200 WiFi launchpad.
 
