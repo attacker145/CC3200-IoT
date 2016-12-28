@@ -1457,7 +1457,7 @@ static void UptimeTask( void *pvParameters )
         //Device is in STA Mode and Force AP Jumper is Connected
         if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
         {
-        	UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
+        	UART_PRINT("\r\nConnectToNetwork: Current ST mode, the SW2 is pressed\r\n");
            //Switch to AP Mode
            lRetVal = ConfigureMode(ROLE_AP);
            //UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
@@ -1628,7 +1628,7 @@ void main()
     //
     // Pinmux for the selected ADC input pin
     //
-    MAP_PinTypeADC(PIN_59, PIN_MODE_255);
+    //MAP_PinTypeADC(PIN_59, PIN_MODE_255);
 
     uiChannel = ADC_CH_2;
 
