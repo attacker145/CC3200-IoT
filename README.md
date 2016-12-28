@@ -14,8 +14,7 @@ will flash the included mcu inage and all the supporting files to the sflash
 on the launch pad.
 
 If you haven't programmed an access point profile (your WiFi SSID and key) yet,
-place a jumpper between the VCC and P58 pins of the launchpad header and reset
-the board. It should now reboot into AP mode. Connect to the
+press SW2 push button on the development board. It will switch the board into AP mode. Connect to the
 'mysimplelink-XXXXXX' AP with a phone or laptop and go to
 http://mysimplelink.net and configure your network settings profile just like
 in the out of box demo.
