@@ -1,7 +1,10 @@
 //*****************************************************************************
+// pin_mux_config.c
 //
-// Copyright (C) 2014 Texas Instruments Incorporated - http://www.ti.com/ 
-// 
+// configure the device pins for different signals
+//
+// Copyright (c) 2016, Texas Instruments Incorporated - http://www.ti.com/
+// All rights reserved.
 // 
 //  Redistribution and use in source and binary forms, with or without 
 //  modification, are permitted provided that the following conditions 
@@ -33,8 +36,8 @@
 //
 //*****************************************************************************
 
-// This file was automatically generated on 7/21/2014 at 3:06:20 PM
-// by TI PinMux version 3.0.334
+// This file was automatically generated on 12/27/2016 at 10:07:25 AM
+// by TI PinMux version
 //
 //*****************************************************************************
 
@@ -43,34 +46,88 @@
 #include "hw_memmap.h"
 #include "hw_gpio.h"
 #include "pin.h"
-#include "rom.h"
-#include "rom_map.h"
 #include "gpio.h"
 #include "prcm.h"
 
 //*****************************************************************************
-void
-PinMuxConfig(void)
+void PinMuxConfig(void)
 {
+
+
+    //
+    // Set unused pins to PIN_MODE_0 with the exception of JTAG pins 16,17,19,20
+    //
+
     //
     // Enable Peripheral Clocks 
     //
-    MAP_PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
-    //MAP_PRCMPeripheralClkEnable(PRCM_GPIOA0, PRCM_RUN_MODE_CLK);
-    //MAP_PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
-    MAP_PRCMPeripheralClkEnable(PRCM_I2CA0, PRCM_RUN_MODE_CLK);
-    //GPIO Clocks
+    PRCMPeripheralClkEnable(PRCM_ADC, PRCM_RUN_MODE_CLK);
+    PRCMPeripheralClkEnable(PRCM_TIMERA2, PRCM_RUN_MODE_CLK);
+    PRCMPeripheralClkEnable(PRCM_TIMERA3, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_GPIOA0, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_GPIOA1, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_GPIOA2, PRCM_RUN_MODE_CLK);
     PRCMPeripheralClkEnable(PRCM_GPIOA3, PRCM_RUN_MODE_CLK);
-
+    PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);
+    PRCMPeripheralClkEnable(PRCM_UARTA0, PRCM_RUN_MODE_CLK);
+    PRCMPeripheralClkEnable(PRCM_I2CA0, PRCM_RUN_MODE_CLK);
 
     //
-    // Configure PIN_18 for GPIO Output
+    // Configure PIN_58 for ADC0 ADC_CH1
     //
-    PinTypeGPIO(PIN_18, PIN_MODE_0, false);
-    GPIODirModeSet(GPIOA3_BASE, 0x10, GPIO_DIR_MODE_OUT);
+    PinTypeADC(PIN_58, PIN_MODE_255);
+
+    //
+    // Configure PIN_04 for TimerCP4 GT_CCP04
+    //
+    PinTypeTimer(PIN_04, PIN_MODE_12);
+
+    //
+    // Configure PIN_63 for TimerCP6 GT_CCP06
+    //
+    PinTypeTimer(PIN_63, PIN_MODE_12);
+
+    //
+    // Configure PIN_50 for GPIO Output
+    //
+    PinTypeGPIO(PIN_50, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x1, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_59 for GPIO Input
+    //
+    PinTypeGPIO(PIN_59, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x10, GPIO_DIR_MODE_IN);
+
+    //
+    // Configure PIN_60 for GPIO Output
+    //
+    PinTypeGPIO(PIN_60, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x20, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_61 for GPIO Output
+    //
+    PinTypeGPIO(PIN_61, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x40, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_62 for GPIO Output
+    //
+    PinTypeGPIO(PIN_62, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x80, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_64 for GPIO Input
+    //
+    PinTypeGPIO(PIN_64, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_03 for GPIO Input
+    //
+    PinTypeGPIO(PIN_03, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA1_BASE, 0x10, GPIO_DIR_MODE_IN);
 
     //
     // Configure PIN_15 for GPIO Output
@@ -79,49 +136,78 @@ PinMuxConfig(void)
     GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_OUT);
 
     //
+    // Configure PIN_16 for GPIO Output
+    //
+    PinTypeGPIO(PIN_16, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA2_BASE, 0x80, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_17 for GPIO Input
+    //
+    PinTypeGPIO(PIN_17, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA3_BASE, 0x1, GPIO_DIR_MODE_IN);
+
+    //
+    // Configure PIN_18 for GPIO Output
+    //
+    PinTypeGPIO(PIN_18, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA3_BASE, 0x10, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_20 for GPIO Input
+    //
+    PinTypeGPIO(PIN_20, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA3_BASE, 0x20, GPIO_DIR_MODE_IN);
+
+    //
+    // Configure PIN_21 for GPIO Input
+    //
+    PinTypeGPIO(PIN_21, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA3_BASE, 0x2, GPIO_DIR_MODE_IN);
+
+    //
+    // Configure PIN_53 for GPIO Output
+    //
+    PinTypeGPIO(PIN_53, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA3_BASE, 0x40, GPIO_DIR_MODE_OUT);
+
+    //
+    // Configure PIN_08 for SPI0 GSPI_CS
+    //
+    PinTypeSPI(PIN_08, PIN_MODE_7);
+
+    //
+    // Configure PIN_05 for SPI0 GSPI_CLK
+    //
+    PinTypeSPI(PIN_05, PIN_MODE_7);
+
+    //
+    // Configure PIN_06 for SPI0 GSPI_MISO
+    //
+    PinTypeSPI(PIN_06, PIN_MODE_7);
+
+    //
+    // Configure PIN_07 for SPI0 GSPI_MOSI
+    //
+    PinTypeSPI(PIN_07, PIN_MODE_7);
+
+    //
     // Configure PIN_55 for UART0 UART0_TX
     //
-    MAP_PinTypeUART(PIN_55, PIN_MODE_3);
+    PinTypeUART(PIN_55, PIN_MODE_3);
 
     //
     // Configure PIN_57 for UART0 UART0_RX
     //
-    MAP_PinTypeUART(PIN_57, PIN_MODE_3);
-
-    //
-    // Configure PIN_58 for GPIOInput
-    //
-    MAP_PinTypeGPIO(PIN_58, PIN_MODE_0, false);
-    MAP_GPIODirModeSet(GPIOA0_BASE, 0x8, GPIO_DIR_MODE_IN);
-
-    //
-    // Configure PIN_64 for GPIOOutput
-    //
-    MAP_PinTypeGPIO(PIN_64, PIN_MODE_0, false);
-    MAP_GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_OUT);
-
-    //
-    // Configure PIN_01 for GPIOOutput
-    //
-    //MAP_PinTypeGPIO(PIN_01, PIN_MODE_0, false);
-    //MAP_GPIODirModeSet(GPIOA1_BASE, 0x4, GPIO_DIR_MODE_OUT);
-
-    //
-    // Configure PIN_02 for GPIOOutput
-    //
-    //MAP_PinTypeGPIO(PIN_02, PIN_MODE_0, false);
-    //MAP_GPIODirModeSet(GPIOA1_BASE, 0x8, GPIO_DIR_MODE_OUT);
-
+    PinTypeUART(PIN_57, PIN_MODE_3);
 
     //
     // Configure PIN_01 for I2C0 I2C_SCL
     //
-    MAP_PinTypeI2C(PIN_01, PIN_MODE_1);
+    PinTypeI2C(PIN_01, PIN_MODE_1);
 
     //
     // Configure PIN_02 for I2C0 I2C_SDA
     //
-    MAP_PinTypeI2C(PIN_02, PIN_MODE_1);
-
-
+    PinTypeI2C(PIN_02, PIN_MODE_1);
 }

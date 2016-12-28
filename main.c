@@ -103,12 +103,13 @@ extern void basic_Interpreter(void *pvParameters);
 //#define EXOSITE_TASK_PRIORITY            2
 #define EXOSITE_TASK_PRIORITY            3
 #define LOW_TASK_PRIORITY                1
-#define HIGH_TASK_PRIORITY               2
+#define HIGH_TASK_PRIORITY               4			// 07/21/16
 #define SPAWN_TASK_PRIORITY              9
 #define OSI_STACK_SIZE                   2048
 #define SMALL_STACK_SIZE                 512
 #define AP_SSID_LEN_MAX                 32
 #define SH_GPIO_3                       3       /* P58 - Device Mode */
+#define SH_GPIO_22                      22      /* P15 - Device Mode */
 #define AUTO_CONNECTION_TIMEOUT_COUNT   50      /* 5 Sec */
 #define SL_STOP_TIMEOUT                 200
 
@@ -790,14 +791,14 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
 
 
             /*
-             * New UART token ****************************New UART token*********************************** New UART token
+             * The New UART token ****************************New UART token*********************************** New UART token
             */
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data,
                     GET_token_URT, strlen((const char *)GET_token_URT)) == 0)
             {
 
                 //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
-                uart = g_ucUARTRecvBuffer1; //g_ucUARTRecvBuffer
+                uart = g_ucUARTRecvBuffer1; //80 characters long
                 //uart = "Sending srings of data"; // works
 
                 //short sLenuart = itoa(g_accXIntervalSum,"hello uart");
@@ -848,9 +849,9 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
                     else if(memcmp(ptr, "Blink", 5) == 0) // com.TI.toggleLED('_Blink');
                     {
                         for (i = 0; i < 50; i++){
-                            GPIO_IF_LedOn(MCU_RED_LED_GPIO);        // Turn On LED
+                            GPIO_IF_LedOn(MCU_RED_LED_GPIO);        // Turn On LED: RED pin64, GPIO9
                             MAP_UtilsDelay(delay);
-                            GPIO_IF_LedOff(MCU_RED_LED_GPIO);       // Turn Off LED
+                            GPIO_IF_LedOff(MCU_RED_LED_GPIO);       // Turn Off LED: BLUE pin64, GPIO09
                             MAP_GPIOPinWrite(GPIOA3_BASE,0x10,0x10);
                             MAP_UtilsDelay(delay);
                             MAP_GPIOPinWrite(GPIOA2_BASE,0x40,0x40);
@@ -1037,11 +1038,11 @@ static int ConfigureMode(int iMode)
 long ConnectToNetwork()
 {
     long lRetVal = -1;                  // Link return value
-    unsigned int uiConnectTimeoutCnt =0;
+    unsigned int uiConnectTimeoutCnt = 0;
 
     // staring simplelink
-    lRetVal =  sl_Start(NULL,NULL,NULL);
-    ASSERT_ON_ERROR( lRetVal);
+    lRetVal =  sl_Start(NULL,NULL,NULL); 	// Initializing the Wi-Fi subsystem as a WLAN station
+    ASSERT_ON_ERROR( lRetVal);				// Prints error code if lRetVal < 0
 
     //UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
 
@@ -1188,8 +1189,8 @@ static void ReadDeviceConfiguration()
     unsigned char ucPinValue;
         
     //Read GPIO
-    GPIO_IF_GetPortNPin(SH_GPIO_3,&uiGPIOPort,&pucGPIOPin);
-    ucPinValue = GPIO_IF_Get(SH_GPIO_3,uiGPIOPort,pucGPIOPin);
+    GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);
+    ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);
         
     //If Connected to VCC, Mode is AP
     if(ucPinValue == 1)
@@ -1292,7 +1293,7 @@ static void ExositeTask(void *pvParameters)
     EXO_STATE state = EXO_STATE_NOT_COMPLETE;
 
     //Read Device Mode Configuration
-    ReadDeviceConfiguration(); // Read Force AP GPIO pin 58 and Configure Mode
+    ReadDeviceConfiguration(); // Reads pin 58 pull-up jumper and sets state to ROLE_STA = 0 or ROLE_AP = 2
 
     //Connect to Network
     ret = ConnectToNetwork();
@@ -1307,9 +1308,13 @@ static void ExositeTask(void *pvParameters)
         osi_Sleep(1000);
     }
 
+
+    //long lRetVal = -1;                  // Link return value
+
     //Handle Async Events
     while(1)
     {
+
         //TODO: Wrap all Exosite calls in a check to see if we're connected.
         while(state != EXO_STATE_INIT_COMPLETE){
             UART_PRINT("[EXO] Exosite Init\r\n");
@@ -1442,11 +1447,32 @@ static void UptimeTask( void *pvParameters )
 {
     while(1)
     {
-        //GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
+
+    	long   lRetVal = -1;
+    	//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
         g_uptimeSec++;
-        UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+
+
+        ReadDeviceConfiguration(); // Reads pin 58 pull-up jumper and sets state to ROLE_STA = 0 or ROLE_AP = 2
+        //Device is in STA Mode and Force AP Jumper is Connected
+        if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
+        {
+        	UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
+           //Switch to AP Mode
+           lRetVal = ConfigureMode(ROLE_AP);
+           //UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
+           ASSERT_ON_ERROR( lRetVal);
+
+        }
+        // Wait here if we're in AP Mode
+        while(g_uiDeviceModeConfig != ROLE_STA){
+        	osi_Sleep(1000);
+        }
+
+
+        UART_PRINT("\n\r\rExecuting UptimeTask\n\r\r");
         // Returns UART line read from the console. Parameter is unsigned char array
-        g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
+        //g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
         //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
 
         //if(iRetVal < 0)
@@ -1466,6 +1492,8 @@ static void UptimeTask( void *pvParameters )
         //{
 
         //}
+
+
         osi_Sleep(1000);
     }
 }
@@ -1643,7 +1671,10 @@ void main()
 
 
     //
-    // Simplelinkspawntask
+    // Simplelinkspawntask:
+    // The simplelink task handles the command responses and events
+    // from the NWP (network porcessor). It is needed and typically,
+    // the high prio task in the system.
     //
     lRetVal = VStartSimpleLinkSpawnTask(SPAWN_TASK_PRIORITY);
     if(lRetVal < 0)
