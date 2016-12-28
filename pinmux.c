@@ -36,7 +36,7 @@
 //
 //*****************************************************************************
 
-// This file was automatically generated on 12/27/2016 at 10:07:25 AM
+// This file was automatically generated on 12/28/2016 at 9:12:50 AM
 // by TI PinMux version
 //
 //*****************************************************************************
@@ -73,9 +73,9 @@ void PinMuxConfig(void)
     PRCMPeripheralClkEnable(PRCM_I2CA0, PRCM_RUN_MODE_CLK);
 
     //
-    // Configure PIN_58 for ADC0 ADC_CH1
+    // Configure PIN_59 for ADC0 ADC_CH2
     //
-    PinTypeADC(PIN_58, PIN_MODE_255);
+    PinTypeADC(PIN_59, PIN_MODE_255);
 
     //
     // Configure PIN_04 for TimerCP4 GT_CCP04
@@ -94,10 +94,10 @@ void PinMuxConfig(void)
     GPIODirModeSet(GPIOA0_BASE, 0x1, GPIO_DIR_MODE_OUT);
 
     //
-    // Configure PIN_59 for GPIO Input
+    // Configure PIN_58 for GPIO Input
     //
-    PinTypeGPIO(PIN_59, PIN_MODE_0, false);
-    GPIODirModeSet(GPIOA0_BASE, 0x10, GPIO_DIR_MODE_IN);
+    PinTypeGPIO(PIN_58, PIN_MODE_0, false);
+    GPIODirModeSet(GPIOA0_BASE, 0x8, GPIO_DIR_MODE_IN);
 
     //
     // Configure PIN_60 for GPIO Output
@@ -118,7 +118,7 @@ void PinMuxConfig(void)
     GPIODirModeSet(GPIOA0_BASE, 0x80, GPIO_DIR_MODE_OUT);
 
     //
-    // Configure PIN_64 for GPIO Input
+    // Configure PIN_64 for GPIO Output
     //
     PinTypeGPIO(PIN_64, PIN_MODE_0, false);
     GPIODirModeSet(GPIOA1_BASE, 0x2, GPIO_DIR_MODE_OUT);
@@ -130,10 +130,10 @@ void PinMuxConfig(void)
     GPIODirModeSet(GPIOA1_BASE, 0x10, GPIO_DIR_MODE_IN);
 
     //
-    // Configure PIN_15 for GPIO Output
+    // Configure PIN_15 for GPIO Input
     //
     PinTypeGPIO(PIN_15, PIN_MODE_0, false);
-    GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_OUT);
+    GPIODirModeSet(GPIOA2_BASE, 0x40, GPIO_DIR_MODE_IN);
 
     //
     // Configure PIN_16 for GPIO Output
