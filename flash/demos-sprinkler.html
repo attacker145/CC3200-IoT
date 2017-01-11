@@ -1,32 +1,31 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Button Demo</title>
 
 
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  	<link rel="stylesheet" href="css/bootstrap.min.css">
-  	<link rel="stylesheet" href="css/rev05style.css">
-  	<link rel="stylesheet" href="css/imgrid_indx.css">
-  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  
-  	<link rel="stylesheet" type="text/css" href="css/bootstrap-3.3.7-dist/css/bootstrap.css" >
-	<link rel="stylesheet" type="text/css" href="css/bootstrap-3.3.7-dist/css/bootstrap.min.css" >
-	<link rel="stylesheet" type="text/css" href="css/bootstrap-3.3.7-dist/css/bootstrap-theme.css" >
-	<link rel="stylesheet" type="text/css" href="css/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css" >
-	<script src="css/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
-	<script src="css/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-	<script src="css/bootstrap-3.3.7-dist/js/npm.js"></script>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	 
-<link rel="stylesheet" type="text/css" href="css/style.css" >
-<script src="js/jquery-1.8.3.min.js"></script>
-<script src="js/com.TI.tokenPoller.js"></script>
-<script src="js/page-actions.js"></script>
-<script type="text/javascript">
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<meta name="description" content="">
+  	<meta name="keywords" content="">
+    <link rel='shortcut icon' href='images/favicon.ico' type='image/x-icon'>	
+    
+    <link rel="stylesheet" type="text/css" href="css/style.css" >
+    
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" >
+       
+    <script src="js/jquery-1.8.3.min.js"></script>
+	<script src="js/com.TI.tokenPoller.js"></script>
+	<script src="js/page-actions.js"></script>
+  	
+	
+		
+	<script src="js/jquery.min.js"></script>	
+	<script src="js/bootstrap.min.js"></script>
+	
+<script>	
 $(function() {
 	var sprinklerSwitch = $('#sprinklerSwitch'),
 		switchBtn = $('#switchImage'),
@@ -36,10 +35,10 @@ $(function() {
 		sprinklerToggle = setInterval(function() {
 			if (spriklerRunning) {
 				if (imageOn) {
-					sprinkler.attr('src',"images/demo-sprinkler-off.jpg");	
+					sprinkler.attr('src',"images/lightON.jpg");	
 					imageOn = false;
 				} else {
-					sprinkler.attr('src',"images/demo-sprinkler-on.jpg");	
+					sprinkler.attr('src',"images/blacksquare.jpg");	
 					imageOn = true;
 				}
 			}
@@ -49,7 +48,8 @@ $(function() {
 			switchBtn.removeClass('on');
 			com.TI.toggleLED('_OFF');		// turn off the LED
 			spriklerRunning = false;
-			sprinkler.attr('src',"images/demo-sprinkler-off.jpg");	
+			//sprinkler.attr('src',"images/demo-sprinkler-off.jpg");	
+			sprinkler.attr('src',"images/blacksquare.jpg");
 			imageOn = false;
 		} else {			
 			switchBtn.addClass('on');
@@ -60,7 +60,6 @@ $(function() {
 	});
 });
 </script>
-<title>Button Demo</title>
 </head>
 
 
@@ -106,20 +105,6 @@ $(function() {
 </nav>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <div class="header">
   <div class="ti-logo"></div>
   <div class="page-title">
@@ -147,7 +132,7 @@ $(function() {
   	<br style="clear:both" />
   
     <h2>Home Automation</h2>
-	<p>Toggle switch ON to see the red LED on the LaunchPad blink, toggle switch OFF to turn off the red LED.</p>
+	<p>Click the pushbutton ON to see the red LED on the LaunchPad blink.</p>
 	
  <!--     
     <div class="switchControl" id="sprinklerSwitch">
@@ -156,18 +141,21 @@ $(function() {
 		<div class="sprinklerOff"></div>
 	</div>
 -->	
-<br></br><br></br><br></br>
+	<br></br><br></br><br></br>
 	<div class="DMMrecord" id="sprinklerSwitch">
-		<div class="sprinklerOn"></div>
-			<div id="switchImage" style="border:2px solid green; width:100%; max-width:400px;"></div>
-		<div class="sprinklerOff"></div>
+		<div class="sprinklerOn">On</div>
+		<div id="switchImage" style = "border:2px solid green; width:100%; max-width:400px;"></div>
+		<div class="sprinklerOff">Off</div>
 	</div>
 	<br></br><br></br>
-	<div class="DMMrecord">	
-		
-		<img border=1 name=img10 src="images/demo-sprinkler-off.jpg" align="center" hspace="0" style="border:4px solid green; width:100%; max-width:400px;">
-		
+	
+	<div class="DMMrecord">			
+		<img border=1 name=img10 src="images/lightON.jpg" id = "sprinkler" align="center" hspace="0" style="border:4px solid green; width:100%; max-width:300px;">		
 	</div>
+	<br></br>
+	
+	<br></br>
+	<br></br>
 	<!--  	
     <img src="images/demo-sprinkler-off.jpg" id="sprinkler" style="max-width:325px; width:80%;height:342px\0/IE8+9;" />
   	-->
