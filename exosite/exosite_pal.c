@@ -160,7 +160,7 @@ uint8_t exoPal_tcpSocketOpen()
         return 1;
     }
     else{
-    	UART_PRINT("Socket created\n\r\n\r");
+    	UART_PRINT("\n\r\n\rSocket created\n\r\n\r");
     }
 
 
@@ -169,16 +169,16 @@ uint8_t exoPal_tcpSocketOpen()
     {
         // error
         //CLI_Write((unsigned char *)"Error connecting to socket\n\r\n\r");
-    	UART_PRINT("Error connecting to socket\n\r\n\r");
+    	UART_PRINT("\n\r\n\rError connecting to socket\n\r\n\r");
         return 2;
     }
     else{
-        	UART_PRINT("Connected to socket\n\r\n\r");
+        	UART_PRINT("\n\r\n\rConnected to socket\n\r\n\r");
     }
 
     curSocketID = SockIDorError;
 
-    UART_PRINT("Socket ID (uid) = %s\r\n\n", curSocketID);
+    UART_PRINT("\n\r\n\rSocket ID (uid) = %s\r\n\n", curSocketID);
 
     //
     // Set Timeout on Socket
