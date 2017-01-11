@@ -36,6 +36,8 @@
 #include "exosite_pal.h"
 
 #include "simplelink.h"
+#include "common.h"
+#include "uart_if.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -154,7 +156,11 @@ uint8_t exoPal_tcpSocketOpen()
     if( SockIDorError < 0 )
     {
         //CLI_Write((unsigned char *)"Error creating socket\n\r\n\r");
+    	UART_PRINT("\n\r\n\rError creating socket\n\r\n\r");
         return 1;
+    }
+    else{
+    	UART_PRINT("Socket created\n\r\n\r");
     }
 
 
@@ -163,9 +169,16 @@ uint8_t exoPal_tcpSocketOpen()
     {
         // error
         //CLI_Write((unsigned char *)"Error connecting to socket\n\r\n\r");
+    	UART_PRINT("Error connecting to socket\n\r\n\r");
         return 2;
     }
+    else{
+        	UART_PRINT("Connected to socket\n\r\n\r");
+    }
+
     curSocketID = SockIDorError;
+
+    UART_PRINT("Socket ID (uid) = %s\r\n\n", curSocketID);
 
     //
     // Set Timeout on Socket
@@ -187,7 +200,7 @@ uint8_t exoPal_tcpSocketOpen()
 
 
 
-#include "uart_if.h"
+//#include "uart_if.h"
 /*!
  * \brief Sends data to the open tcp socket
  *

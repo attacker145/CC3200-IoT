@@ -37,6 +37,7 @@
 
 static const char STR_TIMESTAMP_URL[] = "GET /timestamp ";
 static const char STR_CIK_HEADER[] = "X-Exosite-CIK: ";
+//static const char STR_CIK_HEADER[] = "X-Exosite-CIK: ";
 static const char STR_CONTENT_LENGTH[] = "Content-Length: ";
 static const char STR_READ_URL[] = "GET /onep:v1/stack/alias?";
 static const char STR_WRITE_URL[] = "POST /onep:v1/stack/alias ";
