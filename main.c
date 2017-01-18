@@ -1556,24 +1556,26 @@ static void AccSampleTask( void *pvParameters )
 //*****************************************************************************
 static void UptimeTask( void *pvParameters )
 {
+	unsigned char ucPinValue;
+	unsigned int uiGPIOPort;
+	unsigned char pucGPIOPin;
+
     while(1)
     {
     	g_uptimeSec++;
     	long   lRetVal = -1;
-    	unsigned char ucPinValue;
-    	unsigned int uiGPIOPort;
-    	unsigned char pucGPIOPin;
+
     	//Read GPIO
-    	GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);
-    	ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);
+    	GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);	// Computes port and pin number from the GPIO number
+    	ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);	// Read pin status of GPIO22
 
     	if(ucPinValue == 1)
     	{
-    		ReadDeviceConfiguration(); // Reads pin 58 pull-up jumper and sets state to ROLE_STA = 0 or ROLE_AP = 2
+    		ReadDeviceConfiguration(); // GPIO22 and sets state to ROLE_STA = 0 or ROLE_AP = 2
     		//Device is in STA Mode and Force AP Jumper is Connected
     		if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
     		{
-    			UART_PRINT("\r\nConnectToNetwork: Current ST mode, the jumper is connected\r\n");
+    			UART_PRINT("\r\nConnectToNetwork: Current ST mode, SW2 is pressed\r\n");
     			//Switch to AP Mode
     			lRetVal = ConfigureMode(ROLE_AP);
     			//UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
