@@ -114,6 +114,7 @@ extern void basic_Interpreter(void *pvParameters);
 #define SL_STOP_TIMEOUT                 200
 
 unsigned char printflag = 0;
+unsigned char uptime = 0;
 unsigned char g_ucUARTRecvBuffer1[80];
 typedef enum
 {
@@ -470,6 +471,7 @@ void SimpleLinkWlanEventHandler(SlWlanEvent_t *pWlanEvent)
             //
 
             UART_PRINT("[WLAN EVENT] Station connected to device\n\r");
+            uptime = 1;
         }
         break;
 
@@ -666,7 +668,7 @@ void SimpleLinkHttpServerCallback(SlHttpServerEvent_t *pSlHttpServerEvent,
             pSlHttpServerResponse->ResponseData.token_value.len = 0;        // initialize length to zero
             UART_PRINT("\n\n\rHTTP_GET Tocken:\t %s",ptr);  // add this line only. Print string pointed by ptr. Basically .data will be printed
             if(memcmp(pSlHttpServerEvent->EventData.httpTokenName.data, 
-                    GET_token_TEMP, strlen((const char *)GET_token_TEMP)) == 0) //__SL_G_UTP
+                    GET_token_TEMP, strlen((const char *)GET_token_TEMP)) == 0) //__SL_G_UTP: If get temperature tocken is received
             {
                 float fCurrentTemp;
                 TMP006DrvGetTemp(&fCurrentTemp);        // Get the temperature value and write it to fCurrentTemp
@@ -1228,7 +1230,7 @@ static void ReadDeviceConfiguration()
     unsigned char pucGPIOPin;
     unsigned char ucPinValue;
         
-    //Read GPIO
+    //Read GPIO 22
     GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);
     ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);
         
@@ -1569,9 +1571,20 @@ static void UptimeTask( void *pvParameters )
     	GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);	// Computes port and pin number from the GPIO number
     	ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);	// Read pin status of GPIO22
 
-    	if(ucPinValue == 1)
+    	if((ucPinValue == 1) && (uptime != 1))	// Get in here only once
     	{
+    		UART_PRINT("\r\nUptimeTask: SW2 is pressed - Ready to switch to AP mode\r\n");
+
+    		//uptime = 1;
     		ReadDeviceConfiguration(); // GPIO22 and sets state to ROLE_STA = 0 or ROLE_AP = 2
+
+    		while(ucPinValue == 1){
+    			//Read GPIO
+    			GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);	// Computes port and pin number from the GPIO number
+    			ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);	// Read pin status of GPIO22
+    		}//wait until SW2 is released
+
+
     		//Device is in STA Mode and Force AP Jumper is Connected
     		if(ROLE_AP != lRetVal && g_uiDeviceModeConfig == ROLE_AP )
     		{
@@ -1585,32 +1598,52 @@ static void UptimeTask( void *pvParameters )
     		while(g_uiDeviceModeConfig != ROLE_STA){
     			osi_Sleep(1000);
     		}
+
+    		//UART message
+    		//Returns UART line read from the console. Parameter is unsigned char array
+    		//g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
+    		//UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+    		//if(iRetVal < 0)
+    		//{
+
+    			// Error in parsing the command as length is exceeded.
+    		    //Message("Command length exceeded 512 bytes \n\r");
+    		//}
+    		//else if(iRetVal == 0)
+    		//{
+
+    			// No input. Just an enter pressed probably. Display a prompt.
+
+    		//}
+    		//else
+    		//{
+
+    		//}
     	}
 
+    	if(uptime == 1){// Set to 1 in SL_WLAN_STA_CONNECTED_EVENT line 474 of the main
 
-        //UART_PRINT("\n\r\rExecuting UptimeTask\n\r\r");
-        // Returns UART line read from the console. Parameter is unsigned char array
-        //g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
-        //UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+    		//UART_PRINT("\n\r\rExecuting UptimeTask\n\r\r");
+    		UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
+    		//Returns UART line read from the console. Parameter is unsigned char array
+    		g_UartHaveCmd = GETChar(&g_ucUARTRecvBuffer1[0]);
 
-        //if(iRetVal < 0)
-        //{
-        //
-        // Error in parsing the command as length is exceeded.
-        //
-        //  Message("Command length exceeded 512 bytes \n\r");
-        //}
-        //else if(iRetVal == 0)
-        //{
-        //
-        // No input. Just an enter pressed probably. Display a prompt.
-        //
-        //}
-        //else
-        //{
+    		if(iRetVal < 0)
+    		{
+    			// Error in parsing the command as length is exceeded.
+    			Message("Command length exceeded 512 bytes \n\r");
+    		}
+    		else if(iRetVal == 0)
+    		{
 
-        //}
+    			// No input. Just an enter pressed probably. Display a prompt.
 
+    		}
+    		else
+    		{
+
+    		}
+    	}
 
         osi_Sleep(1000);
     }
