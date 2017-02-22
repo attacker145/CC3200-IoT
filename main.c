@@ -1351,6 +1351,7 @@ long ConnectToNetwork()
             	ASSERT_ON_ERROR( lRetVal);
 
             	UART_PRINT("\r\nConnectToNetwork: Current AP mode\r\n");
+
             	//Switch to AP Mode
             	lRetVal = ConfigureMode(ROLE_AP);
             	UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
@@ -1364,37 +1365,37 @@ long ConnectToNetwork()
             	    _SlNonOsMainLoopTask();
             	    #endif
             	}
-            	         //Stop Internal HTTP Server
-            	         lRetVal = sl_NetAppStop(SL_NET_APP_HTTP_SERVER_ID);
-            	         ASSERT_ON_ERROR( lRetVal);
 
-            	         //Start Internal HTTP Server
-            	         lRetVal = sl_NetAppStart(SL_NET_APP_HTTP_SERVER_ID);
-            	         ASSERT_ON_ERROR( lRetVal);
+            	//Stop Internal HTTP Server
+            	lRetVal = sl_NetAppStop(SL_NET_APP_HTTP_SERVER_ID);
+            	ASSERT_ON_ERROR( lRetVal);
 
-            	        char cCount=0;
+            	//Start Internal HTTP Server
+            	lRetVal = sl_NetAppStart(SL_NET_APP_HTTP_SERVER_ID);
+            	ASSERT_ON_ERROR( lRetVal);
 
-            	        //Blink LED 3 times to Indicate AP Mode
-            	        for(cCount=0;cCount<3;cCount++)
-            	        {
-            	            //Turn RED LED On
-            	            GPIO_IF_LedOn(MCU_RED_LED_GPIO);
-            	            osi_Sleep(400);
+            	char cCount=0;
 
-            	            //Turn RED LED Off
-            	            GPIO_IF_LedOff(MCU_RED_LED_GPIO);
-            	            osi_Sleep(400);
-            	        }
+            	//Blink LED 3 times to Indicate AP Mode
+            	for(cCount=0;cCount<3;cCount++)
+            	{
+            		//Turn RED LED On
+            		GPIO_IF_LedOn(MCU_RED_LED_GPIO);
+            		osi_Sleep(400);
 
-            	        char ssid[32];
-            	 	   unsigned short len = 32;
-            	 	   unsigned short config_opt = WLAN_AP_OPT_SSID;
-            	 	   sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
-            	 	   UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);	//Connect to : 'mysimplelink-XXXXXX'
+            		//Turn RED LED Off
+            		GPIO_IF_LedOff(MCU_RED_LED_GPIO);
+            		osi_Sleep(400);
+            	}
 
-
+            	char ssid[32];
+            	unsigned short len = 32;
+            	unsigned short config_opt = WLAN_AP_OPT_SSID;
+            	sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
+            	UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);	//Connect to : 'mysimplelink-XXXXXX'
             }
     }
+
     //Turn RED LED Off
     GPIO_IF_LedOff(MCU_RED_LED_GPIO);
 
@@ -1678,10 +1679,6 @@ static void AccSampleTask( void *pvParameters )
 static void UptimeTask( void *pvParameters )
 {
 	char c = 0;
-	unsigned int uiGPIOPort;
-	unsigned char pucGPIOPin;
-	unsigned char ucPinValue;
-	long   ret = -1;
 
 	while(1)
 	{
@@ -1693,32 +1690,6 @@ static void UptimeTask( void *pvParameters )
 			UART_PRINT("\n\r\rExecuting UptimeTask Enter a string and press enter\n\r\r");
 			g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer1[0]);
 		}
-
-		//Read GPIO: SH_GPIO_22 - input, uiGPIOPort, pucGPIOPin - output.
-		GPIO_IF_GetPortNPin(SH_GPIO_22, &uiGPIOPort, &pucGPIOPin);	// Computes port and pin number from the GPIO number
-		ucPinValue = GPIO_IF_Get(SH_GPIO_22, uiGPIOPort, pucGPIOPin);	// Read pin status of GPIO22
-
-		//If SH_GPIO_22 is set , Mode is AP
-		if(ucPinValue == 1)
-		{
-			//AP Mode
-			g_uiDeviceModeConfig = ROLE_AP;
-		}
-		else
-		{
-			//STA Mode
-			g_uiDeviceModeConfig = ROLE_STA;
-		}
-
-        if (g_uiDeviceModeConfig == ROLE_AP){
-        	//Connect to Network
-        	ret = ConnectToNetwork();
-        	if(ret < 0)
-        	{
-        		ERR_PRINT(ret);
-        		LOOP_FOREVER();
-        	}
-        }
 
 		osi_Sleep(1000);
 	}
