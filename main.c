@@ -109,6 +109,7 @@ extern void basic_Interpreter(void *pvParameters);
 #define SMALL_STACK_SIZE                 512
 #define AP_SSID_LEN_MAX                 32
 #define SH_GPIO_3                       3       /* P58 - Device Mode */
+#define SH_GPIO_22                      22      /* P15 - Device Mode */
 #define AUTO_CONNECTION_TIMEOUT_COUNT   50      /* 5 Sec */
 #define SL_STOP_TIMEOUT                 200
 
@@ -121,6 +122,16 @@ typedef enum
   LED_ON,
   LED_BLINK
 }eLEDStatus;
+
+// Application specific status/error codes
+typedef enum{
+    // Choosing -0x7D0 to avoid overlap w/ host-driver's error codes
+    LAN_CONNECTION_FAILED = -0x7D0,
+    INTERNET_CONNECTION_FAILED = LAN_CONNECTION_FAILED - 1,
+    DEVICE_NOT_IN_STATION_MODE = INTERNET_CONNECTION_FAILED - 1,
+
+    STATUS_CODE_MAX = -0xBB8
+}e_AppStatusCodes;
 
 //*****************************************************************************
 //                 GLOBAL VARIABLES -- Start
@@ -297,6 +308,176 @@ static unsigned short itoa(char cNum, char *cString)
 
     return length;
 }
+
+//*****************************************************************************
+//
+//! \brief This function initializes the application variables
+//!
+//! \param    None
+//!
+//! \return None
+//!
+//*****************************************************************************
+static void InitializeAppVariables()
+{
+    g_ulStatus = 0;
+    memset(g_ucConnectionSSID,0,sizeof(g_ucConnectionSSID));
+    memset(g_ucConnectionBSSID,0,sizeof(g_ucConnectionBSSID));
+    g_iInternetAccess = -1;
+    g_ucDryerRunning = 0;
+    g_uiDeviceModeConfig = ROLE_STA; //default is STA mode
+    g_ucLEDStatus = LED_OFF;
+}
+
+//*****************************************************************************
+//! \brief This function puts the device in its default state. It:
+//!           - Set the mode to STATION
+//!           - Configures connection policy to Auto and AutoSmartConfig
+//!           - Deletes all the stored profiles
+//!           - Enables DHCP
+//!           - Disables Scan policy
+//!           - Sets Tx power to maximum
+//!           - Sets power policy to normal
+//!           - Unregister mDNS services
+//!           - Remove all filters
+//!
+//! \param   none
+//! \return  On success, zero is returned. On error, negative is returned
+//*****************************************************************************
+static long ConfigureSimpleLinkToDefaultState()
+{
+    SlVersionFull   ver = {0};
+    _WlanRxFilterOperationCommandBuff_t  RxFilterIdMask = {0};
+
+    unsigned char ucVal = 1;
+    unsigned char ucConfigOpt = 0;
+    unsigned char ucConfigLen = 0;
+    unsigned char ucPower = 0;
+
+    long lRetVal = -1;
+    long lMode = -1;
+
+    lMode = sl_Start(0, 0, 0);
+    ASSERT_ON_ERROR(lMode);
+
+    // If the device is not in station-mode, try configuring it in station-mode
+    if (ROLE_STA != lMode)
+    {
+        if (ROLE_AP == lMode)
+        {
+            // If the device is in AP mode, we need to wait for this event
+            // before doing anything
+            while(!IS_IP_ACQUIRED(g_ulStatus))
+            {
+#ifndef SL_PLATFORM_MULTI_THREADED
+              _SlNonOsMainLoopTask();
+#endif
+            }
+        }
+
+        // Switch to STA role and restart
+        lRetVal = sl_WlanSetMode(ROLE_STA);
+        ASSERT_ON_ERROR(lRetVal);
+
+        lRetVal = sl_Stop(0xFF);
+        ASSERT_ON_ERROR(lRetVal);
+
+        lRetVal = sl_Start(0, 0, 0);
+        ASSERT_ON_ERROR(lRetVal);
+
+        // Check if the device is in station again
+        if (ROLE_STA != lRetVal)
+        {
+            // We don't want to proceed if the device is not coming up in STA-mode
+            return DEVICE_NOT_IN_STATION_MODE;
+        }
+    }
+
+    // Get the device's version-information
+    ucConfigOpt = SL_DEVICE_GENERAL_VERSION;
+    ucConfigLen = sizeof(ver);
+    lRetVal = sl_DevGet(SL_DEVICE_GENERAL_CONFIGURATION, &ucConfigOpt,
+                                &ucConfigLen, (unsigned char *)(&ver));
+    ASSERT_ON_ERROR(lRetVal);
+
+    UART_PRINT("Host Driver Version: %s\n\r",SL_DRIVER_VERSION);
+    UART_PRINT("Build Version %d.%d.%d.%d.31.%d.%d.%d.%d.%d.%d.%d.%d\n\r",
+    ver.NwpVersion[0],ver.NwpVersion[1],ver.NwpVersion[2],ver.NwpVersion[3],
+    ver.ChipFwAndPhyVersion.FwVersion[0],ver.ChipFwAndPhyVersion.FwVersion[1],
+    ver.ChipFwAndPhyVersion.FwVersion[2],ver.ChipFwAndPhyVersion.FwVersion[3],
+    ver.ChipFwAndPhyVersion.PhyVersion[0],ver.ChipFwAndPhyVersion.PhyVersion[1],
+    ver.ChipFwAndPhyVersion.PhyVersion[2],ver.ChipFwAndPhyVersion.PhyVersion[3]);
+
+    // Set connection policy to Auto + SmartConfig
+    //      (Device's default connection policy)
+    lRetVal = sl_WlanPolicySet(SL_POLICY_CONNECTION,
+                                SL_CONNECTION_POLICY(1, 0, 0, 0, 1), NULL, 0);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Remove all profiles
+    lRetVal = sl_WlanProfileDel(0xFF);
+    ASSERT_ON_ERROR(lRetVal);
+
+
+
+    //
+    // Device in station-mode. Disconnect previous connection if any
+    // The function returns 0 if 'Disconnected done', negative number if already
+    // disconnected Wait for 'disconnection' event if 0 is returned, Ignore
+    // other return-codes
+    //
+    lRetVal = sl_WlanDisconnect();
+    if(0 == lRetVal)
+    {
+        // Wait
+        while(IS_CONNECTED(g_ulStatus))
+        {
+#ifndef SL_PLATFORM_MULTI_THREADED
+              _SlNonOsMainLoopTask();
+#endif
+        }
+    }
+
+    // Enable DHCP client
+    lRetVal = sl_NetCfgSet(SL_IPV4_STA_P2P_CL_DHCP_ENABLE,1,1,&ucVal);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Disable scan
+    ucConfigOpt = SL_SCAN_POLICY(0);
+    lRetVal = sl_WlanPolicySet(SL_POLICY_SCAN , ucConfigOpt, NULL, 0);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Set Tx power level for station mode
+    // Number between 0-15, as dB offset from max power - 0 will set max power
+    ucPower = 0;
+    lRetVal = sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID,
+            WLAN_GENERAL_PARAM_OPT_STA_TX_POWER, 1, (unsigned char *)&ucPower);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Set PM policy to normal
+    lRetVal = sl_WlanPolicySet(SL_POLICY_PM , SL_NORMAL_POLICY, NULL, 0);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Unregister mDNS services
+    lRetVal = sl_NetAppMDNSUnRegisterService(0, 0);
+    ASSERT_ON_ERROR(lRetVal);
+
+    // Remove  all 64 filters (8*8)
+    memset(RxFilterIdMask.FilterIdMask, 0xFF, 8);
+    lRetVal = sl_WlanRxFilterSet(SL_REMOVE_RX_FILTER, (_u8 *)&RxFilterIdMask,
+                       sizeof(_WlanRxFilterOperationCommandBuff_t));
+    ASSERT_ON_ERROR(lRetVal);
+
+    lRetVal = sl_Stop(SL_STOP_TIMEOUT);
+    ASSERT_ON_ERROR(lRetVal);
+
+    InitializeAppVariables();
+
+    return lRetVal; // Success
+}
+
+
+
 
 
 //*****************************************************************************
@@ -972,26 +1153,6 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
 // SimpleLink Asynchronous Event Handlers -- End
 //*****************************************************************************
 
-//*****************************************************************************
-//
-//! \brief This function initializes the application variables
-//!
-//! \param    None
-//!
-//! \return None
-//!
-//*****************************************************************************
-static void InitializeAppVariables()
-{
-    g_ulStatus = 0;
-    memset(g_ucConnectionSSID,0,sizeof(g_ucConnectionSSID));
-    memset(g_ucConnectionBSSID,0,sizeof(g_ucConnectionBSSID));
-    g_iInternetAccess = -1;
-    g_ucDryerRunning = 0;
-    g_uiDeviceModeConfig = ROLE_STA; //default is STA mode
-    g_ucLEDStatus = LED_OFF;    
-}
-
 
 //****************************************************************************
 //
@@ -1035,10 +1196,18 @@ long ConnectToNetwork()
     long lRetVal = -1;
     unsigned int uiConnectTimeoutCnt =0;
 
+
+    unsigned int uiGPIOPort;//02/17/2017
+    unsigned char pucGPIOPin;//02/17/2017
+    unsigned char ucPinValue, flag;//02/17/2017
+
+
     // staring simplelink
     lRetVal =  sl_Start(NULL,NULL,NULL);
     ASSERT_ON_ERROR( lRetVal);
     //UART_PRINT("[EXO] We connected, but timed-out waiting for a response. Try again.\r\n");
+
+    flag = 0;
 
     // Device is in AP Mode and Force AP Jumper is not Connected
     if(ROLE_STA != lRetVal && g_uiDeviceModeConfig == ROLE_STA )
@@ -1111,7 +1280,7 @@ long ConnectToNetwork()
 	   unsigned short len = 32;
 	   unsigned short config_opt = WLAN_AP_OPT_SSID;
 	   sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
-	   UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);
+	   UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);	//Connect to : 'mysimplelink-XXXXXX'
     }
     else
     {
@@ -1153,9 +1322,77 @@ long ConnectToNetwork()
             ASSERT_ON_ERROR(lRetVal);
 
             //Waiting for the device to Auto Connect
-            while((!IS_CONNECTED(g_ulStatus)) || (!IS_IP_ACQUIRED(g_ulStatus)))
+            while(((!IS_CONNECTED(g_ulStatus)) || (!IS_IP_ACQUIRED(g_ulStatus))) && (flag == 0))
             {
-                MAP_UtilsDelay(500);              
+            	//Read GPIO: SH_GPIO_22 - input, uiGPIOPort, pucGPIOPin - output.
+            	GPIO_IF_GetPortNPin(SH_GPIO_22, &uiGPIOPort, &pucGPIOPin);	// Computes port and pin number from the GPIO number
+            	ucPinValue = GPIO_IF_Get(SH_GPIO_22, uiGPIOPort, pucGPIOPin);	// Read pin status of GPIO22
+
+            	//If SH_GPIO_22 is set , Mode is AP
+            	if(ucPinValue == 1) //*****************************---------------------------**********************
+            	{
+            		UART_PRINT("\r\n SW2 is pressed \r\n");
+            		flag = 1;
+            	}
+            	MAP_UtilsDelay(500);
+            }
+
+            if (flag == 1){
+            	flag = 2;
+
+            	long lRetVal = -1;
+
+            	lRetVal = sl_Stop(0xFF);
+            	ASSERT_ON_ERROR(lRetVal);
+            	g_uiDeviceModeConfig = ROLE_AP;
+
+            	// staring simplelink
+            	lRetVal =  sl_Start(NULL,NULL,NULL);
+            	ASSERT_ON_ERROR( lRetVal);
+
+            	UART_PRINT("\r\nConnectToNetwork: Current AP mode\r\n");
+            	//Switch to AP Mode
+            	lRetVal = ConfigureMode(ROLE_AP);
+            	UART_PRINT("\r\nConnectToNetwork: Switch to AP mode\r\n");
+            	ASSERT_ON_ERROR( lRetVal);
+            	//waiting for the AP to acquire IP address from Internal DHCP Server
+            	// If the device is in AP mode, we need to wait for this event
+            	// before doing anything
+            	while(!IS_IP_ACQUIRED(g_ulStatus))
+            	{
+            	 	#ifndef SL_PLATFORM_MULTI_THREADED
+            	    _SlNonOsMainLoopTask();
+            	    #endif
+            	}
+            	         //Stop Internal HTTP Server
+            	         lRetVal = sl_NetAppStop(SL_NET_APP_HTTP_SERVER_ID);
+            	         ASSERT_ON_ERROR( lRetVal);
+
+            	         //Start Internal HTTP Server
+            	         lRetVal = sl_NetAppStart(SL_NET_APP_HTTP_SERVER_ID);
+            	         ASSERT_ON_ERROR( lRetVal);
+
+            	        char cCount=0;
+
+            	        //Blink LED 3 times to Indicate AP Mode
+            	        for(cCount=0;cCount<3;cCount++)
+            	        {
+            	            //Turn RED LED On
+            	            GPIO_IF_LedOn(MCU_RED_LED_GPIO);
+            	            osi_Sleep(400);
+
+            	            //Turn RED LED Off
+            	            GPIO_IF_LedOff(MCU_RED_LED_GPIO);
+            	            osi_Sleep(400);
+            	        }
+
+            	        char ssid[32];
+            	 	   unsigned short len = 32;
+            	 	   unsigned short config_opt = WLAN_AP_OPT_SSID;
+            	 	   sl_WlanGet(SL_WLAN_CFG_AP_ID, &config_opt , &len, (unsigned char* )ssid);
+            	 	   UART_PRINT("\n\r Connect to : \'%s\'\n\r\n\r",ssid);	//Connect to : 'mysimplelink-XXXXXX'
+
+
             }
     }
     //Turn RED LED Off
@@ -1182,10 +1419,15 @@ static void ReadDeviceConfiguration()
     unsigned char pucGPIOPin;
     unsigned char ucPinValue;
         
-    //Read GPIO
-    GPIO_IF_GetPortNPin(SH_GPIO_3,&uiGPIOPort,&pucGPIOPin);
-    ucPinValue = GPIO_IF_Get(SH_GPIO_3,uiGPIOPort,pucGPIOPin);
+    //Read GPIO: pin58
+    //GPIO_IF_GetPortNPin(SH_GPIO_3,&uiGPIOPort,&pucGPIOPin);
+    //ucPinValue = GPIO_IF_Get(SH_GPIO_3,uiGPIOPort,pucGPIOPin);
         
+    //Read GPIO: SW2
+    GPIO_IF_GetPortNPin(SH_GPIO_22,&uiGPIOPort,&pucGPIOPin);	// Computes port and pin number from the GPIO number
+    ucPinValue = GPIO_IF_Get(SH_GPIO_22,uiGPIOPort,pucGPIOPin);	// Read pin status of GPIO22
+
+
     //If Connected to VCC, Mode is AP
     if(ucPinValue == 1)
     {
@@ -1436,6 +1678,11 @@ static void AccSampleTask( void *pvParameters )
 static void UptimeTask( void *pvParameters )
 {
 	char c = 0;
+	unsigned int uiGPIOPort;
+	unsigned char pucGPIOPin;
+	unsigned char ucPinValue;
+	long   ret = -1;
+
 	while(1)
 	{
 		//GPIO_IF_LedOff(MCU_ORANGE_LED_GPIO);
@@ -1447,7 +1694,33 @@ static void UptimeTask( void *pvParameters )
 			g_UartHaveCmd=GETChar(&g_ucUARTRecvBuffer1[0]);
 		}
 
-        osi_Sleep(1000);
+		//Read GPIO: SH_GPIO_22 - input, uiGPIOPort, pucGPIOPin - output.
+		GPIO_IF_GetPortNPin(SH_GPIO_22, &uiGPIOPort, &pucGPIOPin);	// Computes port and pin number from the GPIO number
+		ucPinValue = GPIO_IF_Get(SH_GPIO_22, uiGPIOPort, pucGPIOPin);	// Read pin status of GPIO22
+
+		//If SH_GPIO_22 is set , Mode is AP
+		if(ucPinValue == 1)
+		{
+			//AP Mode
+			g_uiDeviceModeConfig = ROLE_AP;
+		}
+		else
+		{
+			//STA Mode
+			g_uiDeviceModeConfig = ROLE_STA;
+		}
+
+        if (g_uiDeviceModeConfig == ROLE_AP){
+        	//Connect to Network
+        	ret = ConnectToNetwork();
+        	if(ret < 0)
+        	{
+        		ERR_PRINT(ret);
+        		LOOP_FOREVER();
+        	}
+        }
+
+		osi_Sleep(1000);
 	}
 }
 
