@@ -1,4 +1,4 @@
-# Updated Code for CC3200 Wi-Fi Project
+# Updated Code for the CC3200 Wi-Fi Project
 
 Project design files, explanations, and other important information at: http://www.cnktechlabs.com/CC3200.html 
 
