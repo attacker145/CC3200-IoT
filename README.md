@@ -1,4 +1,4 @@
-# CC3200 Cloud Demo
+# Updated Code for CC3200 Wi-Fi Project
 
 Project design files, explanations, and other important information at: http://www.cnktechlabs.com/CC3200.html 
 
@@ -91,12 +91,11 @@ follow the instructions in the Quick Start Guide included in the SDK.
 7) Open a serial terminal application such as CoolTerm or Putty or termite and connect to
    the debugging serial port.
 
-8) If not already installed, place a jumper between VCC and P58 to enable AP
-   mode for configuring of network parameters.
-
-9) Run the application.
+8) Run the application.
    * Remove the SOP2 jumper.
-   * Reset the board.
+   
+9) Press and hold SW2 switch then reset the board (note: you can switch to AP mode by pressing SW2 button after
+   the board is reset as well.)
 
 10) Connect to the "mysimplelink-XXXXXX" Access Point on smartphone, tablet or
     laptop and open the webpage at "mysimplelink.net".
