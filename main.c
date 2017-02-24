@@ -110,7 +110,7 @@ extern void basic_Interpreter(void *pvParameters);
 #define AP_SSID_LEN_MAX                 32
 #define SH_GPIO_3                       3       /* P58 - Device Mode */
 #define SH_GPIO_22                      22      /* P15 - Device Mode */
-#define AUTO_CONNECTION_TIMEOUT_COUNT   50      /* 5 Sec */
+#define AUTO_CONNECTION_TIMEOUT_COUNT   100      /* 10 Sec - changed on 02/23/2017*/
 #define SL_STOP_TIMEOUT                 200
 
 unsigned char printflag = 0;
@@ -1293,8 +1293,8 @@ long ConnectToNetwork()
         lRetVal = sl_NetAppStart(SL_NET_APP_HTTP_SERVER_ID);
         ASSERT_ON_ERROR( lRetVal);
 
-    	//waiting for the device to Auto Connect
-        while(uiConnectTimeoutCnt<AUTO_CONNECTION_TIMEOUT_COUNT &&
+    	//waiting for the device to Auto Connect: g_ulStatus is set once connected to WLAN
+        while(uiConnectTimeoutCnt<AUTO_CONNECTION_TIMEOUT_COUNT && (g_ulStatus == 0) &&
             ((!IS_CONNECTED(g_ulStatus)) || (!IS_IP_ACQUIRED(g_ulStatus)))) 
         {
             //Turn RED LED On
