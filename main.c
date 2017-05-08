@@ -1124,8 +1124,24 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock)
         LOOP_FOREVER();
     }
     //
-    // This application doesn't work w/ socket - Events are not expected
+    // This application doesn't work w/ socket - Events are not expected SlNetAppEvent_t
     //
+    /*
+     *
+    typedef struct
+	{
+   	   _u32                    Event;
+   	   SlSockEventData_u       socketAsyncEvent;
+	} SlSockEvent_t;
+
+	typedef struct
+	{
+   	   _u32                     Event;
+   	   SlNetAppEventData_u      EventData;
+	}SlNetAppEvent_t;
+
+
+     */
        switch( pSock->Event )
     {
         case SL_SOCKET_TX_FAILED_EVENT:
@@ -1326,7 +1342,7 @@ long ConnectToNetwork()
             {
             	//Read GPIO: SH_GPIO_22 - input, uiGPIOPort, pucGPIOPin - output.
             	GPIO_IF_GetPortNPin(SH_GPIO_22, &uiGPIOPort, &pucGPIOPin);	// Computes port and pin number from the GPIO number
-            	ucPinValue = GPIO_IF_Get(SH_GPIO_22, uiGPIOPort, pucGPIOPin);	// Read pin status of GPIO22
+            	ucPinValue = GPIO_IF_Get(SH_GPIO_22, uiGPIOPort, pucGPIOPin);	// Read pin status of GPIO22 - SW2
 
             	//If SH_GPIO_22 is set , Mode is AP
             	if(ucPinValue == 1) //*****************************---------------------------**********************
